@@ -364,7 +364,7 @@ export const useStore = create<Store>((set) => ({
   updateLeadPayment: (id, config) => set((state) => ({
     leads: state.leads.map(l => l.id === id ? { ...l, payment_config: config } : l)
   })),
-  discardLead: (id, reason, notes) => set((state) => ({
+  discardLead: (id, reason) => set((state) => ({
     leads: state.leads.map(l => l.id === id
       ? { ...l, status: 'No Interesado' as const, discard_reason: reason, discarded_at: new Date().toISOString().split('T')[0] }
       : l
