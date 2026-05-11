@@ -29,18 +29,37 @@ export interface Lead {
   last_contact: string
   budget: number
   notes: string
+  payment_config?: {
+    type: 'contado' | 'cuotas' | 'hipoteca'
+    installments?: number
+    down_payment?: number
+    monthly?: number
+    bank?: string
+    notes?: string
+  }
+  status: 'Activo' | 'No Interesado' | 'Pausado'
+  discard_reason?: string
+  discarded_at?: string
+}
+
+export interface DealNote {
+  id: string
+  text: string
+  timestamp: string
+  author?: string
 }
 
 export interface Deal {
   id: string
   property_id: string
   lead_id: string
-  stage: 'Nuevo' | 'Contactado' | 'Visita' | 'Negociacion' | 'Cierre'
+  stage: 'Nuevo' | 'Contactado' | 'Visita' | 'Negociacion' | 'Cierre' | 'Cancelado'
   value: number
   probability: number
   expected_close: string
   last_update: string
   title: string
+  notes?: DealNote[]
 }
 
 export interface Visit {
@@ -63,6 +82,8 @@ export interface Agent {
   closed_deals: number
   revenue: number
   email: string
+  phone?: string
+  dni?: string
 }
 
 export interface Document {
@@ -82,6 +103,14 @@ export interface Task {
   priority: 'Alta' | 'Media' | 'Baja'
   status: 'Pendiente' | 'Completada'
   assigned_to?: string
+}
+
+export interface WhatsAppMessage {
+  id: string
+  text: string
+  sender: 'agent' | 'client'
+  timestamp: string
+  status: 'sent' | 'delivered' | 'read'
 }
 
 interface UIState {
@@ -105,6 +134,7 @@ interface Store {
   agents: Agent[]
   documents: Document[]
   tasks: Task[]
+  whatsappChats: Record<string, WhatsAppMessage[]>
   ui: UIState
   toasts: { id: string; title: string; description?: string; variant?: 'default' | 'success' | 'error' }[]
   toggleSidebar: () => void
@@ -116,12 +146,20 @@ interface Store {
   addLead: (lead: Omit<Lead, 'id'>) => void
   updateLead: (id: string, lead: Partial<Lead>) => void
   deleteLead: (id: string) => void
+  updateLeadPayment: (id: string, config: Lead['payment_config']) => void
+  discardLead: (id: string, reason: string, notes?: string) => void
+  reactivateLead: (id: string) => void
   addProperty: (property: Omit<Property, 'id'>) => void
   updateProperty: (id: string, property: Partial<Property>) => void
   deleteProperty: (id: string) => void
   archiveProperty: (id: string) => void
+  addAgent: (agent: Omit<Agent, 'id'>) => void
+  updateAgent: (id: string, agent: Partial<Agent>) => void
+  deleteAgent: (id: string) => void
+  addDeal: (deal: Omit<Deal, 'id'>) => void
   updateDeal: (id: string, deal: Partial<Deal>) => void
   moveDeal: (id: string, stage: Deal['stage']) => void
+  addDealNote: (dealId: string, text: string, author?: string) => void
   addVisit: (visit: Omit<Visit, 'id'>) => void
   updateVisit: (id: string, visit: Partial<Visit>) => void
   addDocument: (doc: Omit<Document, 'id'>) => void
@@ -129,8 +167,9 @@ interface Store {
   deleteDocument: (id: string) => void
   sendDocument: (id: string) => void
   addTask: (task: Omit<Task, 'id'>) => void
-  updateTask: (id: string, updates: Partial<Task>) => void
+  updateTask: (id: string, task: Partial<Task>) => void
   deleteTask: (id: string) => void
+  sendWhatsAppMessage: (leadId: string, text: string) => void
   addToast: (toast: Omit<Store['toasts'][0], 'id'>) => void
   removeToast: (id: string) => void
 }
@@ -159,36 +198,36 @@ const mockProperties: Property[] = [
 ]
 
 const mockLeads: Lead[] = [
-  { id: '1', name: 'María González López', source: 'Web', phone: '+54 11 4567-8901', email: 'maria.gonzalez@mail.com', stage: 'Negociacion', assigned_agent: '1', score: 85, last_contact: '2024-04-15', budget: 50000000, notes: 'Interesada en casas de 4 ambientes en Palermo' },
-  { id: '2', name: 'Carlos Rodríguez Fernández', source: 'Referido', phone: '+54 11 4567-8902', email: 'carlos.rodriguez@mail.com', stage: 'Visita', assigned_agent: '2', score: 72, last_contact: '2024-04-14', budget: 35000000, notes: 'Busca departamento en Recoleta' },
-  { id: '3', name: 'Ana Martínez Silva', source: 'Redes', phone: '+54 11 4567-8903', email: 'ana.martinez@mail.com', stage: 'Contactado', assigned_agent: '1', score: 65, last_contact: '2024-04-13', budget: 25000000, notes: 'Primera vivienda' },
-  { id: '4', name: 'Pedro Sánchez Ruiz', source: 'Web', phone: '+54 11 4567-8904', email: 'pedro.sanchez@mail.com', stage: 'Nuevo', assigned_agent: '3', score: 45, last_contact: '2024-04-12', budget: 40000000, notes: 'Inversionista' },
-  { id: '5', name: 'Laura Hernández Vega', source: 'Expo', phone: '+54 11 4567-8905', email: 'laura.hernandez@mail.com', stage: 'Cierre', assigned_agent: '2', score: 95, last_contact: '2024-04-15', budget: 75000000, notes: 'Cierre próximo' },
-  { id: '6', name: 'Miguel Torres Luna', source: 'Contacto', phone: '+54 11 4567-8906', email: 'miguel.torres@mail.com', stage: 'Visita', assigned_agent: '1', score: 78, last_contact: '2024-04-14', budget: 30000000, notes: 'Busca oficina en Catalinas' },
-  { id: '7', name: 'Sofia Ramírez Ortega', source: 'Referido', phone: '+54 11 4567-8907', email: 'sofia.ramirez@mail.com', stage: 'Negociacion', assigned_agent: '4', score: 88, last_contact: '2024-04-15', budget: 60000000, notes: 'Cliente de alto patrimonio' },
-  { id: '8', name: 'Diego Morales Castro', source: 'Web', phone: '+54 11 4567-8908', email: 'diego.morales@mail.com', stage: 'Contactado', assigned_agent: '2', score: 55, last_contact: '2024-04-11', budget: 28000000, notes: 'Interesado en Nordelta' },
-  { id: '9', name: 'Valentina Cruz Bravo', source: 'Redes', phone: '+54 11 4567-8909', email: 'valentina.cruz@mail.com', stage: 'Nuevo', assigned_agent: '3', score: 40, last_contact: '2024-04-10', budget: 20000000, notes: 'Joven profesional' },
-  { id: '10', name: 'Javier Flores Ríos', source: 'Expo', phone: '+54 11 4567-8910', email: 'javier.flores@mail.com', stage: 'Visita', assigned_agent: '1', score: 70, last_contact: '2024-04-14', budget: 45000000, notes: 'Família numerosa' },
-  { id: '11', name: 'Lucia Navarro Jiménez', source: 'Referido', phone: '+54 11 4567-8911', email: 'lucia.navarro@mail.com', stage: 'Negociacion', assigned_agent: '4', score: 82, last_contact: '2024-04-15', budget: 55000000, notes: 'Upgrade de vivienda' },
-  { id: '12', name: 'Andrés Castro Molina', source: 'Web', phone: '+54 11 4567-8912', email: 'andres.castro@mail.com', stage: 'Contactado', assigned_agent: '2', score: 58, last_contact: '2024-04-12', budget: 32000000, notes: 'Busca terreno en Pinamar' },
-  { id: '13', name: 'Carmen Delgado Peña', source: 'Contacto', phone: '+54 11 4567-8913', email: 'carmen.delgado@mail.com', stage: 'Nuevo', assigned_agent: '3', score: 35, last_contact: '2024-04-09', budget: 15000000, notes: 'Presupuesto limitado' },
-  { id: '14', name: 'Pablo Reyes Peña', source: 'Redes', phone: '+54 11 4567-8914', email: 'pablo.reyes@mail.com', stage: 'Visita', assigned_agent: '1', score: 75, last_contact: '2024-04-14', budget: 40000000, notes: 'Empresario' },
-  { id: '15', name: 'Isabel Vargas Díaz', source: 'Referido', phone: '+54 11 4567-8915', email: 'isabel.vargas@mail.com', stage: 'Cierre', assigned_agent: '4', score: 92, last_contact: '2024-04-15', budget: 80000000, notes: 'Alta probabilidad de cierre' },
-  { id: '16', name: 'Francisco Ruiz Sánchez', source: 'Expo', phone: '+54 11 4567-8916', email: 'francisco.ruiz@mail.com', stage: 'Contactado', assigned_agent: '2', score: 62, last_contact: '2024-04-13', budget: 38000000, notes: 'Busca departamento en Puerto Madero' },
-  { id: '17', name: 'Elena Mendoza Rojas', source: 'Web', phone: '+54 11 4567-8917', email: 'elena.mendoza@mail.com', stage: 'Nuevo', assigned_agent: '3', score: 48, last_contact: '2024-04-11', budget: 27000000, notes: 'Primera vivienda' },
-  { id: '18', name: 'Antonio Herrera Gil', source: 'Contacto', phone: '+54 11 4567-8918', email: 'antonio.herrera@mail.com', stage: 'Visita', assigned_agent: '1', score: 68, last_contact: '2024-04-14', budget: 42000000, notes: 'Inversionista inmobiliario' },
-  { id: '19', name: 'Patricia Luna Romero', source: 'Referido', phone: '+54 11 4567-8919', email: 'patricia.luna@mail.com', stage: 'Negociacion', assigned_agent: '4', score: 80, last_contact: '2024-04-15', budget: 52000000, notes: 'Upgrade a casa más grande' },
-  { id: '20', name: 'Roberto Medina Ali', source: 'Redes', phone: '+54 11 4567-8920', email: 'roberto.medina@mail.com', stage: 'Contactado', assigned_agent: '2', score: 52, last_contact: '2024-04-12', budget: 29000000, notes: 'Busca en Martínez' },
-  { id: '21', name: 'Mercedes Castro Gil', source: 'Web', phone: '+54 11 4567-8921', email: 'mercedes.castro@mail.com', stage: 'Nuevo', assigned_agent: '3', score: 38, last_contact: '2024-04-10', budget: 18000000, notes: 'Estudiante' },
-  { id: '22', name: 'Daniel Ortega Vega', source: 'Expo', phone: '+54 11 4567-8922', email: 'daniel.ortega@mail.com', stage: 'Visita', assigned_agent: '1', score: 73, last_contact: '2024-04-14', budget: 35000000, notes: 'Matrimonio joven' },
-  { id: '23', name: 'Sara Núñez Pérez', source: 'Referido', phone: '+54 11 4567-8923', email: 'sara.nunez@mail.com', stage: 'Contactado', assigned_agent: '4', score: 60, last_contact: '2024-04-13', budget: 33000000, notes: 'Busca en Pilar' },
-  { id: '24', name: 'Gabriel Silva Díaz', source: 'Contacto', phone: '+54 11 4567-8924', email: 'gabriel.silva@mail.com', stage: 'Nuevo', assigned_agent: '2', score: 42, last_contact: '2024-04-11', budget: 22000000, notes: 'Primeros pasos' },
-  { id: '25', name: 'Rosa María Torres', source: 'Web', phone: '+54 11 4567-8925', email: 'rosa.torres@mail.com', stage: 'Visita', assigned_agent: '3', score: 77, last_contact: '2024-04-14', budget: 48000000, notes: 'Busca casa con jardín' },
-  { id: '26', name: 'Luis Fernando Moreno', source: 'Redes', phone: '+54 11 4567-8926', email: 'luis.moreno@mail.com', stage: 'Negociacion', assigned_agent: '1', score: 86, last_contact: '2024-04-15', budget: 58000000, notes: 'Inversionista experimentado' },
-  { id: '27', name: 'Adriana Herrera Soto', source: 'Referido', phone: '+54 11 4567-8927', email: 'adriana.herrera@mail.com', stage: 'Contactado', assigned_agent: '4', score: 56, last_contact: '2024-04-12', budget: 26000000, notes: 'Busca en San Telmo' },
-  { id: '28', name: 'Ricardo Vázquez Roca', source: 'Expo', phone: '+54 11 4567-8928', email: 'ricardo.vazquez@mail.com', stage: 'Nuevo', assigned_agent: '2', score: 44, last_contact: '2024-04-10', budget: 19000000, notes: 'Joven profesional' },
-  { id: '29', name: 'Natalia Paredes Soto', source: 'Web', phone: '+54 11 4567-8929', email: 'natalia.paredes@mail.com', stage: 'Visita', assigned_agent: '3', score: 71, last_contact: '2024-04-14', budget: 44000000, notes: 'Família con hijos' },
-  { id: '30', name: 'Fernando Ruiz Gil', source: 'Contacto', phone: '+54 11 4567-8930', email: 'fernando.ruiz@mail.com', stage: 'Negociacion', assigned_agent: '1', score: 84, last_contact: '2024-04-15', budget: 56000000, notes: 'Cierre en proceso' },
+  { id: '1', name: 'María González López', source: 'Web', phone: '+54 11 4567-8901', email: 'maria.gonzalez@mail.com', stage: 'Negociacion', assigned_agent: '1', score: 85, status: 'Activo' as const, last_contact: '2024-04-15', budget: 50000000, notes: 'Interesada en casas de 4 ambientes en Palermo' },
+  { id: '2', name: 'Carlos Rodríguez Fernández', source: 'Referido', phone: '+54 11 4567-8902', email: 'carlos.rodriguez@mail.com', stage: 'Visita', assigned_agent: '2', score: 72, status: 'Activo' as const, last_contact: '2024-04-14', budget: 35000000, notes: 'Busca departamento en Recoleta' },
+  { id: '3', name: 'Ana Martínez Silva', source: 'Redes', phone: '+54 11 4567-8903', email: 'ana.martinez@mail.com', stage: 'Contactado', assigned_agent: '1', score: 65, last_contact: '2024-04-13', budget: 25000000, notes: 'Primera vivienda', status: 'Activo' as const },
+  { id: '4', name: 'Pedro Sánchez Ruiz', source: 'Web', phone: '+54 11 4567-8904', email: 'pedro.sanchez@mail.com', stage: 'Nuevo', assigned_agent: '3', score: 45, last_contact: '2024-04-12', budget: 40000000, notes: 'Inversionista', status: 'Activo' as const },
+  { id: '5', name: 'Laura Hernández Vega', source: 'Expo', phone: '+54 11 4567-8905', email: 'laura.hernandez@mail.com', stage: 'Cierre', assigned_agent: '2', score: 95, last_contact: '2024-04-15', budget: 75000000, notes: 'Cierre próximo', status: 'Activo' as const },
+  { id: '6', name: 'Miguel Torres Luna', source: 'Contacto', phone: '+54 11 4567-8906', email: 'miguel.torres@mail.com', stage: 'Visita', assigned_agent: '1', score: 78, last_contact: '2024-04-14', budget: 30000000, notes: 'Busca oficina en Catalinas', status: 'Activo' as const },
+  { id: '7', name: 'Sofia Ramírez Ortega', source: 'Referido', phone: '+54 11 4567-8907', email: 'sofia.ramirez@mail.com', stage: 'Negociacion', assigned_agent: '4', score: 88, last_contact: '2024-04-15', budget: 60000000, notes: 'Cliente de alto patrimonio', status: 'Activo' as const },
+  { id: '8', name: 'Diego Morales Castro', source: 'Web', phone: '+54 11 4567-8908', email: 'diego.morales@mail.com', stage: 'Contactado', assigned_agent: '2', score: 55, last_contact: '2024-04-11', budget: 28000000, notes: 'Interesado en Nordelta', status: 'Activo' as const },
+  { id: '9', name: 'Valentina Cruz Bravo', source: 'Redes', phone: '+54 11 4567-8909', email: 'valentina.cruz@mail.com', stage: 'Nuevo', assigned_agent: '3', score: 40, last_contact: '2024-04-10', budget: 20000000, notes: 'Joven profesional', status: 'Activo' as const },
+  { id: '10', name: 'Javier Flores Ríos', source: 'Expo', phone: '+54 11 4567-8910', email: 'javier.flores@mail.com', stage: 'Visita', assigned_agent: '1', score: 70, last_contact: '2024-04-14', budget: 45000000, notes: 'Família numerosa', status: 'Activo' as const },
+  { id: '11', name: 'Lucia Navarro Jiménez', source: 'Referido', phone: '+54 11 4567-8911', email: 'lucia.navarro@mail.com', stage: 'Negociacion', assigned_agent: '4', score: 82, last_contact: '2024-04-15', budget: 55000000, notes: 'Upgrade de vivienda', status: 'Activo' as const },
+  { id: '12', name: 'Andrés Castro Molina', source: 'Web', phone: '+54 11 4567-8912', email: 'andres.castro@mail.com', stage: 'Contactado', assigned_agent: '2', score: 58, last_contact: '2024-04-12', budget: 32000000, notes: 'Busca terreno en Pinamar', status: 'Activo' as const },
+  { id: '13', name: 'Carmen Delgado Peña', source: 'Contacto', phone: '+54 11 4567-8913', email: 'carmen.delgado@mail.com', stage: 'Nuevo', assigned_agent: '3', score: 35, last_contact: '2024-04-09', budget: 15000000, notes: 'Presupuesto limitado', status: 'Activo' as const },
+  { id: '14', name: 'Pablo Reyes Peña', source: 'Redes', phone: '+54 11 4567-8914', email: 'pablo.reyes@mail.com', stage: 'Visita', assigned_agent: '1', score: 75, last_contact: '2024-04-14', budget: 40000000, notes: 'Empresario', status: 'Activo' as const },
+  { id: '15', name: 'Isabel Vargas Díaz', source: 'Referido', phone: '+54 11 4567-8915', email: 'isabel.vargas@mail.com', stage: 'Cierre', assigned_agent: '4', score: 92, last_contact: '2024-04-15', budget: 80000000, notes: 'Alta probabilidad de cierre', status: 'Activo' as const },
+  { id: '16', name: 'Francisco Ruiz Sánchez', source: 'Expo', phone: '+54 11 4567-8916', email: 'francisco.ruiz@mail.com', stage: 'Contactado', assigned_agent: '2', score: 62, last_contact: '2024-04-13', budget: 38000000, notes: 'Busca departamento en Puerto Madero', status: 'Activo' as const },
+  { id: '17', name: 'Elena Mendoza Rojas', source: 'Web', phone: '+54 11 4567-8917', email: 'elena.mendoza@mail.com', stage: 'Nuevo', assigned_agent: '3', score: 48, last_contact: '2024-04-11', budget: 27000000, notes: 'Primera vivienda', status: 'Activo' as const },
+  { id: '18', name: 'Antonio Herrera Gil', source: 'Contacto', phone: '+54 11 4567-8918', email: 'antonio.herrera@mail.com', stage: 'Visita', assigned_agent: '1', score: 68, last_contact: '2024-04-14', budget: 42000000, notes: 'Inversionista inmobiliario', status: 'Activo' as const },
+  { id: '19', name: 'Patricia Luna Romero', source: 'Referido', phone: '+54 11 4567-8919', email: 'patricia.luna@mail.com', stage: 'Negociacion', assigned_agent: '4', score: 80, last_contact: '2024-04-15', budget: 52000000, notes: 'Upgrade a casa más grande', status: 'Activo' as const },
+  { id: '20', name: 'Roberto Medina Ali', source: 'Redes', phone: '+54 11 4567-8920', email: 'roberto.medina@mail.com', stage: 'Contactado', assigned_agent: '2', score: 52, last_contact: '2024-04-12', budget: 29000000, notes: 'Busca en Martínez', status: 'Activo' as const },
+  { id: '21', name: 'Mercedes Castro Gil', source: 'Web', phone: '+54 11 4567-8921', email: 'mercedes.castro@mail.com', stage: 'Nuevo', assigned_agent: '3', score: 38, last_contact: '2024-04-10', budget: 18000000, notes: 'Estudiante', status: 'Activo' as const },
+  { id: '22', name: 'Daniel Ortega Vega', source: 'Expo', phone: '+54 11 4567-8922', email: 'daniel.ortega@mail.com', stage: 'Visita', assigned_agent: '1', score: 73, last_contact: '2024-04-14', budget: 35000000, notes: 'Matrimonio joven', status: 'Activo' as const },
+  { id: '23', name: 'Sara Núñez Pérez', source: 'Referido', phone: '+54 11 4567-8923', email: 'sara.nunez@mail.com', stage: 'Contactado', assigned_agent: '4', score: 60, last_contact: '2024-04-13', budget: 33000000, notes: 'Busca en Pilar', status: 'Activo' as const },
+  { id: '24', name: 'Gabriel Silva Díaz', source: 'Contacto', phone: '+54 11 4567-8924', email: 'gabriel.silva@mail.com', stage: 'Nuevo', assigned_agent: '2', score: 42, last_contact: '2024-04-11', budget: 22000000, notes: 'Primeros pasos', status: 'Activo' as const },
+  { id: '25', name: 'Rosa María Torres', source: 'Web', phone: '+54 11 4567-8925', email: 'rosa.torres@mail.com', stage: 'Visita', assigned_agent: '3', score: 77, last_contact: '2024-04-14', budget: 48000000, notes: 'Busca casa con jardín', status: 'Activo' as const },
+  { id: '26', name: 'Luis Fernando Moreno', source: 'Redes', phone: '+54 11 4567-8926', email: 'luis.moreno@mail.com', stage: 'Negociacion', assigned_agent: '1', score: 86, last_contact: '2024-04-15', budget: 58000000, notes: 'Inversionista experimentado', status: 'Activo' as const },
+  { id: '27', name: 'Adriana Herrera Soto', source: 'Referido', phone: '+54 11 4567-8927', email: 'adriana.herrera@mail.com', stage: 'Contactado', assigned_agent: '4', score: 56, last_contact: '2024-04-12', budget: 26000000, notes: 'Busca en San Telmo', status: 'Activo' as const },
+  { id: '28', name: 'Ricardo Vázquez Roca', source: 'Expo', phone: '+54 11 4567-8928', email: 'ricardo.vazquez@mail.com', stage: 'Nuevo', assigned_agent: '2', score: 44, last_contact: '2024-04-10', budget: 19000000, notes: 'Joven profesional', status: 'Activo' as const },
+  { id: '29', name: 'Natalia Paredes Soto', source: 'Web', phone: '+54 11 4567-8929', email: 'natalia.paredes@mail.com', stage: 'Visita', assigned_agent: '3', score: 71, last_contact: '2024-04-14', budget: 44000000, notes: 'Família con hijos', status: 'Activo' as const },
+  { id: '30', name: 'Fernando Ruiz Gil', source: 'Contacto', phone: '+54 11 4567-8930', email: 'fernando.ruiz@mail.com', stage: 'Negociacion', assigned_agent: '1', score: 84, last_contact: '2024-04-15', budget: 56000000, notes: 'Cierre en proceso', status: 'Activo' as const },
 ]
 
 const mockDeals: Deal[] = [
@@ -249,8 +288,8 @@ const mockDocuments: Document[] = [
 ]
 
 const mockTasks: Task[] = [
-  { id: '1', title: 'Llamar a María González', due_date: '2024-04-16', priority: 'Alta', status: 'Pendiente', assigned_to: '1' },
-  { id: '2', title: 'Preparar documentación cierre Casa Martínez', due_date: '2024-04-17', priority: 'Alta', status: 'Pendiente', assigned_to: '4' },
+  { id: '1', title: 'Llamar a Juan', due_date: '2024-04-16', priority: 'Alta', status: 'Pendiente', assigned_to: '1' },
+  { id: '2', title: 'Enviar contrato a María', due_date: '2024-04-17', priority: 'Media', status: 'Pendiente', assigned_to: '2' },
   { id: '3', title: 'Enviar avaluo a cliente Nordelta', due_date: '2024-04-18', priority: 'Media', status: 'Pendiente', assigned_to: '2' },
   { id: '4', title: 'Programar visita Casa Palermo', due_date: '2024-04-19', priority: 'Media', status: 'Pendiente', assigned_to: '1' },
   { id: '5', title: 'Actualizar estado leads en CRM', due_date: '2024-04-20', priority: 'Baja', status: 'Pendiente', assigned_to: '3' },
@@ -267,6 +306,15 @@ export const useStore = create<Store>((set) => ({
   agents: mockAgents,
   documents: mockDocuments,
   tasks: mockTasks,
+  whatsappChats: {
+    '1': [
+      { id: 'msg-1', text: '¡Hola Juan! Soy tu asesor de Grupo Siena. Vi que estuviste interesado en la casa en Palermo.', sender: 'agent', timestamp: new Date(Date.now() - 3600000).toISOString(), status: 'read' },
+      { id: 'msg-2', text: 'Hola, sí, me gustaría saber si el precio es negociable.', sender: 'client', timestamp: new Date(Date.now() - 3000000).toISOString(), status: 'read' }
+    ],
+    '2': [
+      { id: 'msg-3', text: 'María, ¿cómo estás? Te adjunto la información del departamento que visitamos.', sender: 'agent', timestamp: new Date(Date.now() - 86400000).toISOString(), status: 'read' }
+    ]
+  },
   ui: {
     sidebarCollapsed: false,
     activePage: 'overview',
@@ -313,6 +361,29 @@ export const useStore = create<Store>((set) => ({
   deleteLead: (id) => set((state) => ({
     leads: state.leads.filter(l => l.id !== id)
   })),
+  updateLeadPayment: (id, config) => set((state) => ({
+    leads: state.leads.map(l => l.id === id ? { ...l, payment_config: config } : l)
+  })),
+  discardLead: (id, reason, notes) => set((state) => ({
+    leads: state.leads.map(l => l.id === id
+      ? { ...l, status: 'No Interesado' as const, discard_reason: reason, discarded_at: new Date().toISOString().split('T')[0] }
+      : l
+    ),
+    deals: state.deals.map(d => d.lead_id === id
+      ? { ...d, stage: 'Cancelado' as const, last_update: new Date().toISOString().split('T')[0] }
+      : d
+    )
+  })),
+  reactivateLead: (id) => set((state) => ({
+    leads: state.leads.map(l => l.id === id
+      ? { ...l, status: 'Activo' as const, discard_reason: undefined, discarded_at: undefined }
+      : l
+    ),
+    deals: state.deals.map(d => d.lead_id === id && d.stage === 'Cancelado'
+      ? { ...d, stage: 'Nuevo' as const, last_update: new Date().toISOString().split('T')[0] }
+      : d
+    )
+  })),
   addProperty: (property) => set((state) => ({
     properties: [...state.properties, { ...property, id: String(state.properties.length + 1) }]
   })),
@@ -325,11 +396,35 @@ export const useStore = create<Store>((set) => ({
   archiveProperty: (id) => set((state) => ({
     properties: state.properties.map(p => p.id === id ? { ...p, status: 'Vendido' as const } : p)
   })),
+  addAgent: (agent) => set((state) => ({
+    agents: [...state.agents, { ...agent, id: String(Date.now()) }]
+  })),
+  updateAgent: (id, updates) => set((state) => ({
+    agents: state.agents.map(a => a.id === id ? { ...a, ...updates } : a)
+  })),
+  deleteAgent: (id) => set((state) => ({
+    agents: state.agents.filter(a => a.id !== id)
+  })),
+  addDeal: (deal) => set((state) => ({
+    deals: [...state.deals, { ...deal, id: String(Date.now()) }]
+  })),
   updateDeal: (id, updates) => set((state) => ({
     deals: state.deals.map(d => d.id === id ? { ...d, ...updates } : d)
   })),
   moveDeal: (id, stage) => set((state) => ({
     deals: state.deals.map(d => d.id === id ? { ...d, stage, last_update: new Date().toISOString().split('T')[0] } : d)
+  })),
+  addDealNote: (dealId, text, author) => set((state) => ({
+    deals: state.deals.map(d => {
+      if (d.id !== dealId) return d
+      const newNote: DealNote = {
+        id: String(Date.now()),
+        text,
+        timestamp: new Date().toISOString(),
+        author
+      }
+      return { ...d, notes: [...(d.notes || []), newNote] }
+    })
   })),
   addVisit: (visit) => set((state) => ({
     visits: [...state.visits, { ...visit, id: String(state.visits.length + 1) }]
@@ -358,6 +453,22 @@ export const useStore = create<Store>((set) => ({
   deleteTask: (id) => set((state) => ({
     tasks: state.tasks.filter(t => t.id !== id)
   })),
+  sendWhatsAppMessage: (leadId, text) => set((state) => {
+    const chat = state.whatsappChats[leadId] || []
+    const newMsg: WhatsAppMessage = {
+      id: String(Date.now()),
+      text,
+      sender: 'agent',
+      timestamp: new Date().toISOString(),
+      status: 'sent'
+    }
+    return {
+      whatsappChats: {
+        ...state.whatsappChats,
+        [leadId]: [...chat, newMsg]
+      }
+    }
+  }),
   addToast: (toast) => set((state) => {
     const id = Math.random().toString(36).substring(2, 9)
     const newToast = { ...toast, id }

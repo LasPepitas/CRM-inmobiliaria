@@ -44,6 +44,7 @@ export function TareasPage() {
   const [showNewTaskModal, setShowNewTaskModal] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all')
+  const [agentTaskFilter, setAgentTaskFilter] = useState('')
   const [newTask, setNewTask] = useState({
     title: '',
     due_date: '',
@@ -52,9 +53,9 @@ export function TareasPage() {
   })
 
   const filteredTasks = tasks.filter(t => {
-    if (filter === 'pending') return t.status === 'Pendiente'
-    if (filter === 'completed') return t.status === 'Completada'
-    return true
+    const matchesStatus = filter === 'all' || (filter === 'pending' ? t.status === 'Pendiente' : t.status === 'Completada')
+    const matchesAgent = !agentTaskFilter || t.assigned_to === agentTaskFilter
+    return matchesStatus && matchesAgent
   })
 
   const getAgentName = (agentId?: string) => {
@@ -142,7 +143,7 @@ export function TareasPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
         {(['all', 'pending', 'completed'] as const).map((f) => (
           <Button
             key={f}
@@ -153,6 +154,21 @@ export function TareasPage() {
             {f === 'all' ? 'Todas' : f === 'pending' ? 'Pendientes' : 'Completadas'}
           </Button>
         ))}
+        <div className="h-6 w-px bg-outline-variant mx-1" />
+        <select
+          className="h-9 rounded-md border border-outline-variant bg-surface-container-lowest px-3 py-1 text-sm"
+          value={agentTaskFilter}
+          onChange={e => setAgentTaskFilter(e.target.value)}
+        >
+          <option value="">Todos los asesores</option>
+          {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+        </select>
+        {agentTaskFilter && (
+          <Button variant="outline" size="sm" onClick={() => setAgentTaskFilter('')} className="text-error-500 border-error-500/30">
+            Limpiar asesor
+          </Button>
+        )}
+        <span className="ml-auto text-sm text-neutral-500">{filteredTasks.length} tareas</span>
       </div>
 
       {/* Tasks List */}

@@ -14,12 +14,13 @@ import {
   ChevronRight,
   CheckSquare,
   Plug,
+  MessageCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 const navItems = [
-  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+  { id: 'overview', label: 'Resumen', icon: LayoutDashboard },
   { id: 'propiedades', label: 'Propiedades', icon: Building2 },
   { id: 'leads', label: 'Leads', icon: Users },
   { id: 'pipeline', label: 'Pipeline', icon: Kanban },
@@ -27,6 +28,7 @@ const navItems = [
   { id: 'tareas', label: 'Tareas', icon: CheckSquare },
   { id: 'reportes', label: 'Reportes', icon: BarChart3 },
   { id: 'documentos', label: 'Documentos', icon: FileText },
+  { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
   { id: 'integracion', label: 'Integración', icon: Plug },
   { id: 'equipo', label: 'Equipo', icon: UsersRound },
   { id: 'ajustes', label: 'Ajustes', icon: Settings },

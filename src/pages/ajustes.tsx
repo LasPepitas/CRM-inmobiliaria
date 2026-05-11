@@ -145,7 +145,6 @@ export function AjustesPage() {
           <TabsTrigger value="notifications">Notificaciones</TabsTrigger>
           <TabsTrigger value="security">Seguridad</TabsTrigger>
           <TabsTrigger value="team">Equipo</TabsTrigger>
-          <TabsTrigger value="branding">Branding</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="mt-6">

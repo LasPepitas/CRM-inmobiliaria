@@ -12,6 +12,7 @@ import {
   IntegracionPage,
   EquipoPage,
   AjustesPage,
+  WhatsAppPage,
 } from '@/pages'
 
 const pages: Record<string, React.ComponentType> = {
@@ -26,6 +27,7 @@ const pages: Record<string, React.ComponentType> = {
   integracion: IntegracionPage,
   equipo: EquipoPage,
   ajustes: AjustesPage,
+  whatsapp: WhatsAppPage,
 }
 
 function App() {
