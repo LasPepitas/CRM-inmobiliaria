@@ -72,6 +72,74 @@ const defaultPermissions = {
 
 type PermissionsType = typeof defaultPermissions
 
+function RoleItem({ role }: { role: typeof roles[0] }) {
+  const [enabled, setEnabled] = useState(role.id !== 'readonly')
+  return (
+    <div className="p-4 border rounded-lg">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <Shield className="h-4 w-4 text-primary" />
+          <span className="font-medium">{role.name}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-neutral-500">{enabled ? 'Activo' : 'Inactivo'}</span>
+          <button
+            onClick={() => setEnabled(!enabled)}
+            className={cn("relative inline-flex h-6 w-11 items-center rounded-full transition-colors", enabled ? "bg-primary" : "bg-neutral-200")}
+          >
+            <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white transition-transform", enabled ? "translate-x-6" : "translate-x-1")} />
+          </button>
+        </div>
+      </div>
+      <p className="text-sm text-neutral-600">{role.description}</p>
+      <div className="flex flex-wrap gap-1 mt-2">
+        {role.permissions.map(p => (
+          <Badge key={p} variant="outline" className="text-xs">{p}</Badge>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function TeamMemberItem({ member }: { member: typeof teamMembers[0] }) {
+  const [role, setRole] = useState(member.role)
+  const [active, setActive] = useState(member.active)
+  return (
+    <div className="flex items-center gap-4 p-4 border rounded-lg">
+      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center font-medium text-primary">
+        {member.name.split(' ').map(n => n[0]).join('')}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium">{member.name}</p>
+        <p className="text-sm text-neutral-500">{member.email}</p>
+      </div>
+      <select
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+        className="h-9 rounded-md border border-outline-variant bg-surface-container-lowest px-3 py-1 text-sm"
+      >
+        <option>Administrador</option>
+        <option>Gerente</option>
+        <option>Asesor</option>
+        <option>Solo Lectura</option>
+      </select>
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-neutral-500">{active ? 'Activo' : 'Inactivo'}</span>
+        <button
+          onClick={() => setActive(!active)}
+          className={cn("relative inline-flex h-6 w-11 items-center rounded-full transition-colors", active ? "bg-success-500" : "bg-neutral-200")}
+        >
+          <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white transition-transform", active ? "translate-x-6" : "translate-x-1")} />
+        </button>
+      </div>
+      <div className="flex gap-1">
+        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon" className="text-error-500"><Trash2 className="h-4 w-4" /></Button>
+      </div>
+    </div>
+  )
+}
+
 export function AjustesPage() {
   const { addToast, ui, toggleDarkMode } = useStore()
   const [activeTab, setActiveTab] = useState('profile')
@@ -251,34 +319,9 @@ export function AjustesPage() {
                 <CardDescription>Configura los niveles de acceso para cada rol</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {roles.map((role) => {
-                  const [enabled, setEnabled] = useState(role.id !== 'readonly')
-                  return (
-                    <div key={role.id} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Shield className="h-4 w-4 text-primary" />
-                          <span className="font-medium">{role.name}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-neutral-500">{enabled ? 'Activo' : 'Inactivo'}</span>
-                          <button
-                            onClick={() => setEnabled(!enabled)}
-                            className={cn("relative inline-flex h-6 w-11 items-center rounded-full transition-colors", enabled ? "bg-primary" : "bg-neutral-200")}
-                          >
-                            <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white transition-transform", enabled ? "translate-x-6" : "translate-x-1")} />
-                          </button>
-                        </div>
-                      </div>
-                      <p className="text-sm text-neutral-600">{role.description}</p>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {role.permissions.map(p => (
-                          <Badge key={p} variant="outline" className="text-xs">{p}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                })}
+                {roles.map((role) => (
+                  <RoleItem key={role.id} role={role} />
+                ))}
               </CardContent>
             </Card>
 
@@ -361,44 +404,9 @@ export function AjustesPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {teamMembers.map((member) => {
-                  const [role, setRole] = useState(member.role)
-                  const [active, setActive] = useState(member.active)
-                  return (
-                    <div key={member.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center font-medium text-primary">
-                        {member.name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium">{member.name}</p>
-                        <p className="text-sm text-neutral-500">{member.email}</p>
-                      </div>
-                      <select
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                        className="h-9 rounded-md border border-outline-variant bg-surface-container-lowest px-3 py-1 text-sm"
-                      >
-                        <option>Administrador</option>
-                        <option>Gerente</option>
-                        <option>Asesor</option>
-                        <option>Solo Lectura</option>
-                      </select>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-neutral-500">{active ? 'Activo' : 'Inactivo'}</span>
-                        <button
-                          onClick={() => setActive(!active)}
-                          className={cn("relative inline-flex h-6 w-11 items-center rounded-full transition-colors", active ? "bg-success-500" : "bg-neutral-200")}
-                        >
-                          <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white transition-transform", active ? "translate-x-6" : "translate-x-1")} />
-                        </button>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="text-error-500"><Trash2 className="h-4 w-4" /></Button>
-                      </div>
-                    </div>
-                  )
-                })}
+                {teamMembers.map((member) => (
+                  <TeamMemberItem key={member.id} member={member} />
+                ))}
               </div>
             </CardContent>
           </Card>

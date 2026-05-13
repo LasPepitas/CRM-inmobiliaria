@@ -1,0 +1,6 @@
+export { PropertiesTable } from './components/PropertiesTable'
+export { PropertyDetailModal } from './components/PropertyDetailModal'
+export { PropertyFormModal } from './components/PropertyFormModal'
+export { DeletePropertyDialog } from './components/DeletePropertyDialog'
+export { useProperties } from './hooks/useProperties'
+export type { Property, PropertyFormData, PropertyType, PropertyStatus } from './types'
