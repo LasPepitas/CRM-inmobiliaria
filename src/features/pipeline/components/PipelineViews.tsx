@@ -89,7 +89,6 @@ export function KanbanBoard({ deals, getLeadName, getLeadAgent, onSelectDeal }: 
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Card as _Card } from '@/components/ui/card'
 
 interface DealsTableProps {
   deals: Deal[]

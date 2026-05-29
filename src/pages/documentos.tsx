@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -26,6 +27,7 @@ export function DocumentosPage() {
     deals,
     filteredDocuments,
     activeFilters,
+    isLoading,
     showNewDocModal,
     newDoc,
     setShowNewDocModal,
@@ -52,13 +54,18 @@ export function DocumentosPage() {
     getPropertyTitle,
     getLeadName,
     handleAddDocument,
+    handleDownloadDocument,
     handleDeleteDocument,
     handleSendDocument,
     handleSignDocument,
     handleFinishWizard,
     handlePrint,
-    addToast,
+    fetchDocuments,
   } = useDocumentos()
+
+  useEffect(() => {
+    fetchDocuments()
+  }, [fetchDocuments])
 
   return (
     <div className="space-y-6">
@@ -66,9 +73,12 @@ export function DocumentosPage() {
       <div className="flex items-center justify-between print:hidden">
         <div>
           <h1 className="text-3xl font-bold tracking-tight font-heading">Documentos</h1>
-          <p className="text-neutral-600 mt-1">{documents.length} documentos en gestión</p>
+          <p className="text-neutral-600 mt-1">{isLoading ? 'Cargando...' : `${documents.length} documentos en gestión`}</p>
         </div>
         <div className="flex items-center gap-3">
+          {isLoading && (
+            <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          )}
           <Button variant="outline" onClick={() => setShowWizardModal(true)}>
             <FileSignature className="h-4 w-4 mr-2" /> Generar Contrato
           </Button>
@@ -135,50 +145,53 @@ export function DocumentosPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredDocuments.map((doc) => (
-                <TableRow key={doc.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded bg-neutral-100 flex items-center justify-center text-xl">
-                        {typeIcons[doc.type] || '📄'}
-                      </div>
-                      <span className="font-medium">{doc.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell><Badge variant="outline">{doc.type}</Badge></TableCell>
-                  <TableCell className="text-neutral-600">{getPropertyTitle(doc.property_id)}</TableCell>
-                  <TableCell className="text-neutral-600">{getLeadName(doc.lead_id)}</TableCell>
-                  <TableCell><Badge variant={statusVariants[doc.status]}>{doc.status}</Badge></TableCell>
-                  <TableCell className="text-neutral-600">{formatDate(doc.updated_at)}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => addToast({ title: 'Descargando...', description: doc.name, variant: 'default' })}>
-                          <Download className="h-4 w-4 mr-2" /> Descargar
-                        </DropdownMenuItem>
-                        {doc.status === 'Borrador' && (
-                          <DropdownMenuItem onClick={() => handleSendDocument(doc.id)}>
-                            <Send className="h-4 w-4 mr-2" /> Enviar
-                          </DropdownMenuItem>
-                        )}
-                        {doc.status === 'Enviado' && (
-                          <DropdownMenuItem onClick={() => handleSignDocument(doc.id)}>
-                            <CheckCircle className="h-4 w-4 mr-2" /> Marcar Firmado
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem onClick={() => handleDeleteDocument(doc.id)} className="text-error-500">
-                          <Trash2 className="h-4 w-4 mr-2" /> Eliminar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filteredDocuments.length === 0 && (
+              {isLoading && filteredDocuments.length === 0 ? (
+                <tr><TableCell colSpan={7} className="h-32 text-center text-neutral-400">Cargando documentos...</TableCell></tr>
+              ) : filteredDocuments.length === 0 ? (
                 <tr><TableCell colSpan={7} className="h-32 text-center text-neutral-400">No hay documentos que coincidan con los filtros</TableCell></tr>
+              ) : (
+                filteredDocuments.map((doc) => (
+                  <TableRow key={doc.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded bg-neutral-100 flex items-center justify-center text-xl">
+                          {typeIcons[doc.type] || '📄'}
+                        </div>
+                        <span className="font-medium">{doc.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell><Badge variant="outline">{doc.type}</Badge></TableCell>
+                    <TableCell className="text-neutral-600">{getPropertyTitle(doc.property_id)}</TableCell>
+                    <TableCell className="text-neutral-600">{getLeadName(doc.leadId)}</TableCell>
+                    <TableCell><Badge variant={statusVariants[doc.status]}>{doc.status}</Badge></TableCell>
+                    <TableCell className="text-neutral-600">{formatDate(doc.updated_at)}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" disabled={isLoading}><MoreVertical className="h-4 w-4" /></Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleDownloadDocument(doc.id)}>
+                            <Download className="h-4 w-4 mr-2" /> Descargar
+                          </DropdownMenuItem>
+                          {doc.status === 'Borrador' && (
+                            <DropdownMenuItem onClick={() => handleSendDocument(doc.id)}>
+                              <Send className="h-4 w-4 mr-2" /> Enviar
+                            </DropdownMenuItem>
+                          )}
+                          {doc.status === 'Enviado' && (
+                            <DropdownMenuItem onClick={() => handleSignDocument(doc.id)}>
+                              <CheckCircle className="h-4 w-4 mr-2" /> Marcar Firmado
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem onClick={() => handleDeleteDocument(doc.id)} className="text-error-500">
+                            <Trash2 className="h-4 w-4 mr-2" /> Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
             </TableBody>
           </Table>
@@ -190,6 +203,15 @@ export function DocumentosPage() {
         <DialogContent>
           <DialogHeader><DialogTitle>Subir Documento</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">Archivo *</label>
+              <input
+                id="doc-file-input"
+                type="file"
+                className="flex h-10 w-full rounded-md border border-outline-variant bg-surface-container-lowest px-3 py-2 text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary/10 file:text-sm file:font-medium hover:file:bg-primary/20 mt-1"
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+              />
+            </div>
             <div>
               <label className="text-sm font-medium">Nombre del Documento *</label>
               <Input
@@ -232,7 +254,7 @@ export function DocumentosPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowNewDocModal(false)}>Cancelar</Button>
-            <Button onClick={handleAddDocument}><Plus className="h-4 w-4 mr-2" />Subir</Button>
+            <Button onClick={handleAddDocument} disabled={isLoading}><Plus className="h-4 w-4 mr-2" />{isLoading ? 'Subiendo...' : 'Subir'}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
