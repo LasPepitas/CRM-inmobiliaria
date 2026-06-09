@@ -16,10 +16,8 @@ import {
   CheckCircle,
   Sun,
   Moon,
-  CalendarDays,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { ConnectCalendarButton } from '@/features/visitas'
 
 const roles = [
   {
