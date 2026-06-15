@@ -1,7 +1,3 @@
-// src/features/visitas/api/appointmentsApi.ts
-// Capa de servicio + adapters para el recurso Appointment del backend.
-// Aísla al resto de la feature de los cambios en el DTO del backend.
-
 import { apiClient } from '@/lib/apiClient'
 import type { Visit } from '@/store/slices/visitsSlice'
 import type { NewVisitForm } from '../types'
@@ -11,8 +7,8 @@ import type { NewVisitForm } from '../types'
 export interface AppointmentResponse {
   id: string
   title: string
-  startTime: string       // ISO 8601: "2026-06-15T10:00:00.000Z"
-  endTime: string         // ISO 8601: "2026-06-15T11:00:00.000Z"
+  startTime: string       
+  endTime: string         
   status: 'PROGRAMADA' | 'COMPLETADA' | 'CANCELADA'
   notes: string | null
   location: string | null
@@ -40,7 +36,7 @@ export interface CreateAppointmentPayload {
   location?: string
   leadId?: string
   propertyId?: string
-  advisorId?: string      // Solo honrado por managers/admins — el backend lo ignora para asesores
+  advisorId?: string
 }
 
 export interface UpdateAppointmentPayload extends Partial<CreateAppointmentPayload> {}

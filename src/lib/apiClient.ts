@@ -1,52 +1,30 @@
-// src/lib/apiClient.ts
-// Cliente HTTP base para comunicación con el backend NestJS.
-// Gestiona el JWT, la URL base y el envelope { data, meta } del ResponseInterceptor.
+import axios from 'axios'
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+const instance = axios.create({
+  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3000',
+  headers: { 'Content-Type': 'application/json' },
+})
 
-function getToken(): string | null {
-  return localStorage.getItem('crm_token')
-}
+instance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('crm_token')
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
 
-interface RequestOptions extends RequestInit {
-  params?: Record<string, string>
-}
-
-async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { params, ...fetchOptions } = options
-
-  const url = new URL(`${BASE_URL}${endpoint}`)
-  if (params) {
-    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v))
-  }
-
-  const token = getToken()
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...fetchOptions.headers,
-  }
-
-  const response = await fetch(url.toString(), { ...fetchOptions, headers })
-
-  // El backend siempre responde JSON — incluso en errores
-  const json = await response.json()
-
-  if (!response.ok) {
-    throw new Error(json.message ?? `Error ${response.status}`)
-  }
-
-  // El ResponseInterceptor del backend envuelve en { data: T, meta: {...} }
-  return json.data as T
-}
+instance.interceptors.response.use(
+  (response) => response.data.data,
+  (error) => Promise.reject(
+    new Error(error.response?.data?.message ?? `Error ${error.response?.status ?? 'desconocido'}`)
+  )
+)
 
 export const apiClient = {
-  get: <T>(endpoint: string, params?: Record<string, string>) =>
-    request<T>(endpoint, { method: 'GET', params }),
-  post: <T>(endpoint: string, body: unknown) =>
-    request<T>(endpoint, { method: 'POST', body: JSON.stringify(body) }),
-  patch: <T>(endpoint: string, body: unknown) =>
-    request<T>(endpoint, { method: 'PATCH', body: JSON.stringify(body) }),
+  get:    <T>(endpoint: string, params?: Record<string, string>) =>
+    instance.get(endpoint, { params }) as Promise<T>,
+  post:   <T>(endpoint: string, body: unknown) =>
+    instance.post(endpoint, body) as Promise<T>,
+  patch:  <T>(endpoint: string, body: unknown) =>
+    instance.patch(endpoint, body) as Promise<T>,
   delete: <T>(endpoint: string) =>
-    request<T>(endpoint, { method: 'DELETE' }),
+    instance.delete(endpoint) as Promise<T>,
 }
