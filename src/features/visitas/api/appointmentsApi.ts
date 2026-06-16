@@ -39,7 +39,7 @@ export interface CreateAppointmentPayload {
   advisorId?: string
 }
 
-export interface UpdateAppointmentPayload extends Partial<CreateAppointmentPayload> {}
+export type UpdateAppointmentPayload = Partial<CreateAppointmentPayload>
 
 // ─── Mapas de status ──────────────────────────────────────────────────────────
 
