@@ -1,5 +1,7 @@
+import { useAuth } from '@/features/auth'
 import { useStore } from '@/store'
 import { Layout } from '@/components/layout/layout'
+import { LoginPage } from '@/pages'
 import {
   OverviewPage,
   PropertiesPage,
@@ -31,6 +33,27 @@ const pages: Record<string, React.ComponentType> = {
 }
 
 function App() {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-on-surface-variant">Cargando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />
+  }
+
+  return <AuthenticatedApp />
+}
+
+function AuthenticatedApp() {
   const { ui } = useStore()
   const PageComponent = pages[ui.activePage] || OverviewPage
 

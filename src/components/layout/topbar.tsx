@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/features/auth'
 import { useStore } from '@/store'
 import { Bell, Search, Calendar } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -12,8 +13,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { getInitials } from '@/lib/utils'
 
 export function Topbar() {
+  const { authUser, logout } = useAuth()
   const { ui } = useStore()
   const collapsed = ui.sidebarCollapsed
 
@@ -48,11 +51,13 @@ export function Topbar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-2 pl-2 pr-3">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs">RG</AvatarFallback>
+                <AvatarFallback className="text-xs bg-secondary text-on-secondary">
+                  {authUser ? getInitials(authUser.fullName) : '??'}
+                </AvatarFallback>
               </Avatar>
               <div className="hidden md:flex flex-col items-start">
-                <span className="text-sm font-medium">Roberto García</span>
-                <span className="text-xs text-on-surface-variant">Gerente</span>
+                <span className="text-sm font-medium">{authUser?.fullName || 'Usuario'}</span>
+                <span className="text-xs text-on-surface-variant">{authUser?.role || 'Asesor'}</span>
               </div>
             </Button>
           </DropdownMenuTrigger>
@@ -62,7 +67,12 @@ export function Topbar() {
             <DropdownMenuItem>Perfil</DropdownMenuItem>
             <DropdownMenuItem>Configuración</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-error-500">Cerrar Sesión</DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-error-500 cursor-pointer"
+              onClick={() => logout()}
+            >
+              Cerrar Sesión
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
