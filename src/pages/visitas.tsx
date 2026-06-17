@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, SlidersHorizontal } from 'lucide-react'
+import { Plus, SlidersHorizontal, AlertCircle, Loader2 } from 'lucide-react'
 import { VISIT_STATUSES } from '@/features/visitas/constants'
 import { CalendarView, ListView, NewVisitModal, useVisitas } from '@/features/visitas'
 
@@ -14,6 +14,8 @@ export function VisitasPage() {
     properties,
     leads,
     agents,
+    visitsLoading,
+    visitsError,
     statusFilter,
     agentFilter,
     showNewVisitModal,
@@ -27,6 +29,7 @@ export function VisitasPage() {
     getVisitsByDate,
     clearFilters,
     handleAddVisit,
+    fetchVisits,
   } = useVisitas()
 
   return (
@@ -42,6 +45,22 @@ export function VisitasPage() {
           Programar Visita
         </Button>
       </div>
+
+      {/* Banner de error del backend */}
+      {visitsError && (
+        <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span className="flex-1">Error al cargar visitas: {visitsError}</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchVisits()}
+            className="border-red-300 text-red-700 hover:bg-red-100"
+          >
+            Reintentar
+          </Button>
+        </div>
+      )}
 
       {/* Filter bar */}
       <Card>
@@ -84,7 +103,16 @@ export function VisitasPage() {
               </Button>
             )}
 
-            <span className="ml-auto text-sm text-neutral-500">{filteredVisits.length} visitas</span>
+            <span className="ml-auto flex items-center gap-1.5 text-sm text-neutral-500">
+              {visitsLoading ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Cargando...
+                </>
+              ) : (
+                `${filteredVisits.length} visitas`
+              )}
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -130,3 +158,4 @@ export function VisitasPage() {
     </div>
   )
 }
+

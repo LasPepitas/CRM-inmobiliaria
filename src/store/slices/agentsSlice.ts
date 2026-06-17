@@ -23,6 +23,7 @@ const mockAgents: Agent[] = [
   { id: '6', name: 'Lucía Rodríguez', role: 'Asesor', active_deals: 3, closed_deals: 10, revenue: 78000000, email: 'lucia.rodriguez@siena.com' },
   { id: '7', name: 'Miguel Torres', role: 'Asesor', active_deals: 2, closed_deals: 6, revenue: 45000000, email: 'miguel.torres@siena.com' },
   { id: '8', name: 'Sofia Herrera', role: 'Asesor Senior', active_deals: 3, closed_deals: 15, revenue: 134000000, email: 'sofia.herrera@siena.com' },
+  { id: 'asesor-mock-123', name: 'Mock Asesor', role: 'Asesor', active_deals: 0, closed_deals: 0, revenue: 0, email: 'mock-asesor@siena.com' },
 ]
 
 export interface AgentsSlice {

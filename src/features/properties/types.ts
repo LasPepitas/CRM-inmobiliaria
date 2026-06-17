@@ -13,6 +13,8 @@ export interface PropertyFormData {
   bedrooms: number
   bathrooms: number
   status: PropertyStatus
+  imageUrl?: string
+  isPublished: boolean
 }
 
 export const PROPERTY_FORM_DEFAULT: PropertyFormData = {
@@ -25,4 +27,6 @@ export const PROPERTY_FORM_DEFAULT: PropertyFormData = {
   bedrooms: 0,
   bathrooms: 0,
   status: 'Disponible',
+  imageUrl: '',
+  isPublished: false,
 }

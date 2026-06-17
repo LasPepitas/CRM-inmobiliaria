@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, AlertCircle, Loader2 } from 'lucide-react'
 import {
   PropertiesTable,
   PropertyDetailModal,
@@ -12,6 +12,8 @@ import {
 export function PropertiesPage() {
   const {
     properties,
+    propertiesLoading,
+    propertiesError,
     filteredProperties,
     selectedProperty,
     editingProperty,
@@ -36,6 +38,8 @@ export function PropertiesPage() {
     handleArchive,
     handleDelete,
     openEditModal,
+    fetchProperties,
+    handleTogglePublish,
   } = useProperties()
 
   return (
@@ -44,13 +48,38 @@ export function PropertiesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight font-heading">Propiedades</h1>
-          <p className="text-neutral-600 mt-1">{properties.length} propiedades en portfolio</p>
+          <p className="text-neutral-600 mt-1">
+            {propertiesLoading ? (
+              <span className="flex items-center gap-1.5">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                Cargando portfolio...
+              </span>
+            ) : (
+              `${properties.length} propiedades en portfolio`
+            )}
+          </p>
         </div>
         <Button id="add-property-btn" onClick={() => openModal('addProperty')}>
           <Plus className="h-4 w-4" />
           Agregar Propiedad
         </Button>
       </div>
+
+      {/* Banner de error del backend */}
+      {propertiesError && (
+        <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span className="flex-1">Error al cargar propiedades: {propertiesError}</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchProperties()}
+            className="border-red-300 text-red-700 hover:bg-red-100"
+          >
+            Reintentar
+          </Button>
+        </div>
+      )}
 
       {/* Table */}
       <Card>
@@ -68,6 +97,7 @@ export function PropertiesPage() {
             onEdit={openEditModal}
             onArchive={handleArchive}
             onDeleteConfirm={(id) => setDeleteConfirmId(id)}
+            onTogglePublish={handleTogglePublish}
           />
         </CardHeader>
         <CardContent className="p-0" />

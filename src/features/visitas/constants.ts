@@ -18,10 +18,10 @@ export const WEEK_DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
 // Static calendar config (April 2024 demo)
 export const CALENDAR_CONFIG = {
-  year: 2024,
-  month: 3, // April (0-indexed)
-  label: new Date(2024, 3, 1).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' }),
-  daysInMonth: new Date(2024, 4, 0).getDate(),
-  firstWeekday: new Date(2024, 3, 1).getDay(),
+  year: 2026,
+  month: 5, // April (0-indexed)
+  label: new Date(2026, 5, 1).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' }),
+  daysInMonth: new Date(2026, 6, 0).getDate(),
+  firstWeekday: new Date(2026, 5, 1).getDay(),
   todayDay: 15,
 }
