@@ -6,14 +6,23 @@ import { cn, getInitials, formatDate } from '@/lib/utils'
 import type { Lead } from '../types'
 import { stageColors } from '../constants'
 
-interface DiscardedLeadsTableProps {
+const DISCARD_REASON_LABELS: Record<string, string> = {
+  precio: 'Precio elevado',
+  otra_agencia: 'Otra agencia',
+  no_responde: 'Sin respuesta',
+  cambio_planes: 'Cambio de planes',
+  zona: 'No le convence la zona',
+  otro: 'Otro motivo',
+}
+
+interface LeadsDiscardedTableProps {
   leads: Lead[]
   getAgentName: (agentId: string) => string
   onReactivate: (id: string) => void
   onDelete: (id: string) => void
 }
 
-export function DiscardedLeadsTable({ leads, getAgentName, onReactivate, onDelete }: DiscardedLeadsTableProps) {
+export function LeadsDiscardedTable({ leads, getAgentName, onReactivate, onDelete }: LeadsDiscardedTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -32,10 +41,10 @@ export function DiscardedLeadsTable({ leads, getAgentName, onReactivate, onDelet
             <TableCell>
               <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-semibold text-neutral-500">
-                  {getInitials(lead.name)}
+                  {getInitials(lead.firstName + ' ' + lead.lastName)}
                 </div>
                 <div>
-                  <p className="font-medium text-neutral-600">{lead.name}</p>
+                  <p className="font-medium text-neutral-600">{lead.firstName} {lead.lastName}</p>
                   <p className="text-xs text-neutral-400">{lead.email}</p>
                 </div>
               </div>
@@ -48,14 +57,7 @@ export function DiscardedLeadsTable({ leads, getAgentName, onReactivate, onDelet
             </TableCell>
             <TableCell>
               <Badge variant="outline" className="text-warning-600 border-warning-300 bg-warning-50">
-                {{
-                  'precio': 'Precio elevado',
-                  'otra_agencia': 'Otra agencia',
-                  'no_responde': 'Sin respuesta',
-                  'cambio_planes': 'Cambio de planes',
-                  'zona': 'No le convence la zona',
-                  'otro': 'Otro motivo'
-                }[lead.discard_reason || 'otro'] || lead.discard_reason}
+                {DISCARD_REASON_LABELS[lead.discard_reason || 'otro'] || lead.discard_reason}
               </Badge>
             </TableCell>
             <TableCell className="text-neutral-500 text-sm">{lead.discarded_at ? formatDate(lead.discarded_at) : '-'}</TableCell>

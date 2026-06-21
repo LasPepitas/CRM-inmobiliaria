@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { sourceOptions } from '../constants'
 import type { Lead, LeadSource } from '../types'
 
-interface NewLeadModalProps {
+interface LeadFormModalProps {
   open: boolean
   onClose: () => void
   form: Partial<Lead>
@@ -21,7 +21,7 @@ interface NewLeadModalProps {
   onSave: () => void
 }
 
-export function NewLeadModal({ open, onClose, form, setForm, isEditing, onSave }: NewLeadModalProps) {
+export function LeadFormModal({ open, onClose, form, setForm, isEditing, onSave }: LeadFormModalProps) {
   const agents = useStore((state) => state.agents)
 
   return (
@@ -31,30 +31,40 @@ export function NewLeadModal({ open, onClose, form, setForm, isEditing, onSave }
           <DialogTitle>{isEditing ? 'Editar Lead' : 'Nuevo Lead'}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <label className="text-sm font-medium">Nombre Completo *</label>
-            <Input 
-              value={form.name || ''} 
-              onChange={e => setForm({ ...form, name: e.target.value })} 
-              placeholder="Ej: Juan Pérez"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">Nombre *</label>
+              <Input
+                value={form.firstName || ''}
+                onChange={e => setForm({ ...form, firstName: e.target.value })}
+                placeholder="Ej: Juan"
+              />
+            </div>
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">Apellido *</label>
+              <Input
+                value={form.lastName || ''}
+                onChange={e => setForm({ ...form, lastName: e.target.value })}
+                placeholder="Ej: Pérez"
+              />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <label className="text-sm font-medium">Email *</label>
-              <Input 
-                value={form.email || ''} 
-                onChange={e => setForm({ ...form, email: e.target.value })} 
+              <Input
+                value={form.email || ''}
+                onChange={e => setForm({ ...form, email: e.target.value })}
                 placeholder="juan@mail.com"
                 type="email"
               />
             </div>
             <div className="grid gap-2">
               <label className="text-sm font-medium">Teléfono</label>
-              <Input 
-                value={form.phone || ''} 
-                onChange={e => setForm({ ...form, phone: e.target.value })} 
-                placeholder="+54 11..."
+              <Input
+                value={form.phone || ''}
+                onChange={e => setForm({ ...form, phone: e.target.value })}
+                placeholder="+51 965..."
               />
             </div>
           </div>
@@ -74,31 +84,43 @@ export function NewLeadModal({ open, onClose, form, setForm, isEditing, onSave }
             </div>
             <div className="grid gap-2">
               <label className="text-sm font-medium">Presupuesto ($)</label>
-              <Input 
-                type="number" 
-                value={form.budget || ''} 
+              <Input
+                type="number"
+                value={form.budget || ''}
                 onChange={e => setForm({ ...form, budget: Number(e.target.value) })}
               />
             </div>
           </div>
-          <div className="grid gap-2">
-            <label className="text-sm font-medium">Asesor Asignado</label>
-            <Select value={form.assigned_agent} onValueChange={(val) => setForm({ ...form, assigned_agent: val })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar asesor" />
-              </SelectTrigger>
-              <SelectContent>
-                {agents.map(agent => (
-                  <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">Asesor Asignado</label>
+              <Select value={form.assigned_agent} onValueChange={(val) => setForm({ ...form, assigned_agent: val })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar asesor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {agents.map(agent => (
+                    <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">Score (0-100)</label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={form.score || ''}
+                onChange={e => setForm({ ...form, score: Number(e.target.value) })}
+              />
+            </div>
           </div>
           <div className="grid gap-2">
             <label className="text-sm font-medium">Notas iniciales</label>
-            <Input 
-              value={form.notes || ''} 
-              onChange={e => setForm({ ...form, notes: e.target.value })} 
+            <Input
+              value={form.notes || ''}
+              onChange={e => setForm({ ...form, notes: e.target.value })}
               placeholder="¿Qué está buscando el cliente?"
             />
           </div>

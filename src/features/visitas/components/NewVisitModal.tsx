@@ -69,7 +69,7 @@ export function NewVisitModal({
               <SelectContent>
                 <SelectItem value="__none__">Seleccionar cliente...</SelectItem>
                 {leads.map(l => (
-                  <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+                  <SelectItem key={l.id} value={l.id}>{`${l.firstName} ${l.lastName}`.trim()}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

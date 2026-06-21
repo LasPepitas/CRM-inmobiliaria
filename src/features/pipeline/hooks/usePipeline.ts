@@ -12,8 +12,10 @@ export function usePipeline() {
   const [stageFilter, setStageFilter] = useState('')
   const [noteText, setNoteText] = useState('')
 
-  const getLeadName = (leadId: string) =>
-    leads.find(l => l.id === leadId)?.name || 'Lead'
+  const getLeadName = (leadId: string) => {
+    const l = leads.find(l => l.id === leadId)
+    return l ? `${l.firstName} ${l.lastName}`.trim() : 'Lead'
+  }
 
   const getLeadAgent = (leadId: string) => {
     const lead = leads.find(l => l.id === leadId)
@@ -28,7 +30,7 @@ export function usePipeline() {
       const agent = agents.find(a => a.id === lead?.assigned_agent)
       const matchesSearch = !search ||
         deal.title.toLowerCase().includes(search.toLowerCase()) ||
-        (lead?.name || '').toLowerCase().includes(search.toLowerCase())
+        (lead ? `${lead.firstName} ${lead.lastName}` : '').toLowerCase().includes(search.toLowerCase())
       const matchesAgent = !agentFilter || agent?.id === agentFilter
       const matchesStage = !stageFilter || deal.stage === stageFilter
       return matchesSearch && matchesAgent && matchesStage

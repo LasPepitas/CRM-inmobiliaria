@@ -9,7 +9,8 @@ export interface LeadPaymentConfig {
 
 export interface Lead {
   id: string
-  name: string
+  firstName: string
+  lastName: string
   source: 'Web' | 'Referido' | 'Contacto' | 'Redes' | 'Expo'
   phone: string
   email: string

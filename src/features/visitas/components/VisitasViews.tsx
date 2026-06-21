@@ -88,7 +88,7 @@ export function CalendarView({ getVisitsByDate, upcomingVisits, properties, lead
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="font-medium text-sm">{property?.title}</p>
-                    <p className="text-xs text-neutral-500">{lead?.name}</p>
+                    <p className="text-xs text-neutral-500">{lead ? `${lead.firstName} ${lead.lastName}`.trim() : ''}</p>
                   </div>
                   <Badge variant="outline">{visit.status}</Badge>
                 </div>
@@ -141,7 +141,7 @@ export function ListView({ visits, properties, leads, getAgentName }: ListViewPr
                 <div className="flex-1">
                   <p className="font-medium">{property?.title}</p>
                   <div className="flex items-center gap-4 mt-1 text-sm text-neutral-600">
-                    <span className="flex items-center gap-1"><User className="h-3 w-3" />{lead?.name}</span>
+                    <span className="flex items-center gap-1"><User className="h-3 w-3" />{lead ? `${lead.firstName} ${lead.lastName}`.trim() : ''}</span>
                     <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{visit.time}</span>
                     <span className="flex items-center gap-1 text-neutral-400">Asesor: {getAgentName(visit.agent)}</span>
                   </div>
