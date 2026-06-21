@@ -7,21 +7,17 @@ export async function uploadDocumentApi(data: UploadDocumentRequest): Promise<Do
   if (data.name) formData.append('name', data.name)
   if (data.leadId) formData.append('leadId', data.leadId)
 
-  const response = await apiClient.post<{ success: boolean; data: DocumentResponse }>('/documents/upload', formData)
-  return response.data.data
+  return apiClient.post<DocumentResponse>('/documents/upload', formData)
 }
 
 export async function getDocumentsApi(): Promise<DocumentResponse[]> {
-  const response = await apiClient.get<{ success: boolean; data: DocumentResponse[] }>('/documents')
-  return response.data.data || []
+  return apiClient.get<DocumentResponse[]>('/documents')
 }
 
 export async function getDocumentByIdApi(id: string): Promise<DocumentResponse> {
-  const response = await apiClient.get<{ success: boolean; data: DocumentResponse }>(`/documents/${id}`)
-  return response.data.data
+  return apiClient.get<DocumentResponse>(`/documents/${id}`)
 }
 
-export async function deleteDocumentApi(id: string): Promise<{ success: boolean; message: string }> {
-  const response = await apiClient.delete<{ success: boolean; message: string }>(`/documents/${id}`)
-  return response.data
-}
+export async function deleteDocumentApi(id: string): Promise<{ message: string }> {
+  return apiClient.delete<{ message: string }>(`/documents/${id}`)
+}

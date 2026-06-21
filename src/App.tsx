@@ -1,7 +1,7 @@
+import { useEffect } from 'react'
 import { useAuth } from '@/features/auth'
 import { useStore } from '@/store'
 import { Layout } from '@/components/layout/layout'
-import { LoginPage } from '@/pages'
 import {
   OverviewPage,
   PropertiesPage,
@@ -15,6 +15,8 @@ import {
   EquipoPage,
   AjustesPage,
   WhatsAppPage,
+  LandingPage,
+  LoginPage,
 } from '@/pages'
 
 const pages: Record<string, React.ComponentType> = {
@@ -33,7 +35,17 @@ const pages: Record<string, React.ComponentType> = {
 }
 
 function App() {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, checkSession } = useAuth()
+
+  useEffect(() => {
+    checkSession()
+  }, [checkSession])
+
+  const isLanding = window.location.hash === '#landing' || window.location.pathname === '/landing'
+
+  if (isLanding) {
+    return <LandingPage />
+  }
 
   if (isLoading) {
     return (
@@ -55,7 +67,10 @@ function App() {
 
 function AuthenticatedApp() {
   const { ui } = useStore()
-  const PageComponent = pages[ui.activePage] || OverviewPage
+  const { hasRoutePermission } = useAuth()
+  
+  const isAllowed = hasRoutePermission(ui.activePage)
+  const PageComponent = isAllowed ? (pages[ui.activePage] || OverviewPage) : OverviewPage
 
   return (
     <Layout>

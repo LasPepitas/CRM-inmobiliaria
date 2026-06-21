@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useAuth } from '@/features/auth'
 
 const navItems = [
   { id: 'overview', label: 'Resumen', icon: LayoutDashboard },
@@ -36,7 +37,10 @@ const navItems = [
 
 export function Sidebar() {
   const { ui, toggleSidebar, setActivePage } = useStore()
+  const { hasRoutePermission } = useAuth()
   const collapsed = ui.sidebarCollapsed
+
+  const visibleItems = navItems.filter((item) => hasRoutePermission(item.id))
 
   return (
     <aside
@@ -52,7 +56,7 @@ export function Sidebar() {
 
         <ScrollArea className="flex-1 py-4">
           <nav className="space-y-1 px-2">
-            {navItems.map((item) => {
+            {visibleItems.map((item) => {
               const Icon = item.icon
               const isActive = ui.activePage === item.id
               return (

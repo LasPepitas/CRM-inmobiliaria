@@ -1,12 +1,14 @@
 import { apiClient } from '@/lib/api-client'
-import type { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } from '../types'
+import type { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, AuthUser } from '../types'
 
 export async function loginApi(credentials: LoginRequest): Promise<LoginResponse> {
-  const response = await apiClient.post<LoginResponse>('/auth/login', credentials)
-  return response.data
+  return apiClient.post<LoginResponse>('/auth/login', credentials)
 }
 
 export async function registerApi(userData: RegisterRequest): Promise<RegisterResponse> {
-  const response = await apiClient.post<RegisterResponse>('/auth/register', userData)
-  return response.data
+  return apiClient.post<RegisterResponse>('/auth/register', userData)
 }
+
+export async function getProfileApi(): Promise<AuthUser> {
+  return apiClient.get<AuthUser>('/users/me')
+}

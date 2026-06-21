@@ -11,22 +11,36 @@ export interface RegisterRequest {
   role?: 'GENERAL_MANAGER' | 'COMMERCIAL_MANAGER' | 'INTERNAL_ADVISOR' | 'EXTERNAL_ADVISOR'
 }
 
+export interface AuthUser {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  fullName?: string
+  role: string
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface LoginResponse {
-  success: boolean
-  data: {
-    access_token: string
-  }
+  access_token: string
+  user: AuthUser
 }
 
 export interface RegisterResponse {
-  success: boolean
-  data: {
-    id: string
-    email: string
-    firstName: string
-    lastName: string
-    role: string
-    createdAt: string
-    updatedAt: string
-  }
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  role: string
+  createdAt: string
+  updatedAt: string
 }
+
+export const ROUTE_ROLES: Record<string, string[]> = {
+  reportes: ['GENERAL_MANAGER', 'COMMERCIAL_MANAGER', 'SALES_LEADER', 'MARKETING_LEADER'],
+  whatsapp: ['GENERAL_MANAGER', 'COMMERCIAL_MANAGER', 'SALES_LEADER', 'TEAM_LEADER', 'INTERNAL_ADVISOR'],
+  integracion: ['GENERAL_MANAGER', 'COMMERCIAL_MANAGER', 'SALES_LEADER', 'TEAM_LEADER', 'INTERNAL_ADVISOR'],
+  equipo: ['GENERAL_MANAGER', 'COMMERCIAL_MANAGER', 'SALES_LEADER'],
+  ajustes: ['GENERAL_MANAGER', 'COMMERCIAL_MANAGER'],
+}

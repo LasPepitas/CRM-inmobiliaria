@@ -1,15 +1,5 @@
 import { create } from 'zustand'
-
-interface AuthUser {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-  fullName: string
-  role: string
-  createdAt: Date
-  updatedAt: Date
-}
+import type { AuthUser } from '../types'
 
 interface AuthState {
   authUser: AuthUser | null
@@ -19,6 +9,7 @@ interface AuthState {
   setLoading: (loading: boolean) => void
   logout: () => void
 }
+
 
 export const useAuthStore = create<AuthState>((set) => ({
   authUser: null,

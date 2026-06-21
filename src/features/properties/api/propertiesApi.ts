@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/apiClient'
+import { apiClient } from '@/lib/api-client'
 import type { Property } from '@/store/slices/propertiesSlice'
 import type { PropertyFormData, PropertyType, PropertyStatus } from '../types'
 
