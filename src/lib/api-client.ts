@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const apiClient = axios.create({
+const instance = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3000',
   timeout: 30000,
   headers: {
@@ -8,7 +8,7 @@ export const apiClient = axios.create({
   },
 })
 
-apiClient.interceptors.request.use(
+instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('auth_token')
     if (token) {
@@ -22,7 +22,7 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-apiClient.interceptors.response.use(
+instance.interceptors.response.use(
   (response) => {
     // Si la respuesta exitosa viene envuelta en { success, data }, devolvemos data directamente.
     if (response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data) {
@@ -38,4 +38,15 @@ apiClient.interceptors.response.use(
     const errorMessage = error.response?.data?.message ?? error.message
     return Promise.reject(new Error(errorMessage))
   }
-)
+)
+
+export const apiClient = {
+  get: <T>(endpoint: string, params?: Record<string, string>) =>
+    instance.get(endpoint, { params }) as Promise<T>,
+  post: <T>(endpoint: string, body?: unknown, config?: import('axios').AxiosRequestConfig) =>
+    instance.post(endpoint, body, config) as Promise<T>,
+  patch: <T>(endpoint: string, body?: unknown, config?: import('axios').AxiosRequestConfig) =>
+    instance.patch(endpoint, body, config) as Promise<T>,
+  delete: <T>(endpoint: string) =>
+    instance.delete(endpoint) as Promise<T>,
+}

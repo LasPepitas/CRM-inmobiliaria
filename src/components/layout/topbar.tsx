@@ -52,7 +52,7 @@ export function Topbar() {
             <Button variant="ghost" className="gap-2 pl-2 pr-3">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="text-xs bg-secondary text-on-secondary">
-                  {authUser ? getInitials(authUser.fullName) : '??'}
+                  {authUser ? getInitials(authUser.fullName || '') : '??'}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:flex flex-col items-start">

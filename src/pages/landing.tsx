@@ -9,7 +9,7 @@ import { Building2, Shield, Sparkles, CheckCircle2, AlertCircle } from 'lucide-r
 declare global {
   interface Window {
     turnstile?: {
-      render: (container: string | HTMLElement, options: any) => string
+      render: (container: string | HTMLElement, options: Record<string, unknown>) => string
       reset: (widgetId?: string) => void
       remove: (widgetId?: string) => void
     }
@@ -78,7 +78,7 @@ export function LandingPage() {
         try {
           window.turnstile.remove(widgetIdRef.current)
           widgetIdRef.current = null
-        } catch (e) {
+        } catch {
           // Ignorar errores al desmontar
         }
       }
@@ -133,9 +133,9 @@ export function LandingPage() {
       if (window.turnstile && widgetIdRef.current) {
         window.turnstile.reset(widgetIdRef.current)
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err)
-      setErrorMessage(err.message || 'Ocurrió un error al enviar el formulario. Intentá nuevamente.')
+      setErrorMessage(err instanceof Error ? err.message : 'Ocurrió un error al enviar el formulario. Intentá nuevamente.')
       
       // Resetear Turnstile en caso de error
       if (window.turnstile && widgetIdRef.current) {
