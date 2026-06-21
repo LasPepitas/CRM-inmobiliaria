@@ -12,25 +12,20 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatCurrency } from '@/lib/utils'
 
+interface PaymentFormState {
+  type: 'contado' | 'cuotas' | 'hipoteca'
+  installments: number
+  down_payment: number
+  monthly: number
+  bank: string
+  notes: string
+}
+
 interface LeadDetailModalProps {
   leadId: string | null
   onClose: () => void
-  paymentForm: {
-    type: 'contado' | 'cuotas' | 'hipoteca'
-    installments: number
-    down_payment: number
-    monthly: number
-    bank: string
-    notes: string
-  }
-  setPaymentForm: (form: {
-    type: 'contado' | 'cuotas' | 'hipoteca'
-    installments: number
-    down_payment: number
-    monthly: number
-    bank: string
-    notes: string
-  }) => void
+  paymentForm: PaymentFormState
+  setPaymentForm: (form: PaymentFormState) => void
   onSavePayment: (id: string) => void
 }
 
@@ -53,7 +48,7 @@ export function LeadDetailModal({
     <Dialog open={!!leadId} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>{selectedLeadData.name}</DialogTitle>
+          <DialogTitle>{selectedLeadData.firstName} {selectedLeadData.lastName}</DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="info" className="mt-4">
           <TabsList className="grid w-full grid-cols-2">

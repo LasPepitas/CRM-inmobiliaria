@@ -11,25 +11,25 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowRightLeft } from 'lucide-react'
 
-interface ConvertLeadForm {
+interface LeadConvertForm {
   property_id: string
   value: number
   probability: number
   expected_close: string
 }
 
-interface ConvertLeadModalProps {
+interface LeadConvertModalProps {
   leadId: string | null
   onClose: () => void
-  form: ConvertLeadForm
-  setForm: (form: ConvertLeadForm) => void
+  form: LeadConvertForm
+  setForm: (form: LeadConvertForm) => void
   onConfirm: () => void
 }
 
-export function ConvertLeadModal({ leadId, onClose, form, setForm, onConfirm }: ConvertLeadModalProps) {
+export function LeadConvertModal({ leadId, onClose, form, setForm, onConfirm }: LeadConvertModalProps) {
   const leads = useStore((state) => state.leads)
   const properties = useStore((state) => state.properties)
-  
+
   const lead = leads.find(l => l.id === leadId)
 
   return (
@@ -43,9 +43,9 @@ export function ConvertLeadModal({ leadId, onClose, form, setForm, onConfirm }: 
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-primary/80">
-            <strong>{lead?.name}</strong> pasará al pipeline de ventas.
+            <strong>{lead?.firstName} {lead?.lastName}</strong> pasará al pipeline de ventas.
           </div>
-          
+
           <div>
             <label className="text-sm font-medium">Propiedad de interés *</label>
             <Select value={form.property_id} onValueChange={val => setForm({ ...form, property_id: val })}>
@@ -59,7 +59,7 @@ export function ConvertLeadModal({ leadId, onClose, form, setForm, onConfirm }: 
               </SelectContent>
             </Select>
           </div>
-          
+
           <div>
             <label className="text-sm font-medium">Valor estimado del negocio ($)</label>
             <Input

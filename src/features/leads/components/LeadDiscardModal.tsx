@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { XCircle } from 'lucide-react'
 
-interface DiscardLeadModalProps {
+interface LeadDiscardModalProps {
   leadId: string | null
   onClose: () => void
   form: { reason: string; notes: string }
@@ -19,9 +19,10 @@ interface DiscardLeadModalProps {
   onConfirm: () => void
 }
 
-export function DiscardLeadModal({ leadId, onClose, form, setForm, onConfirm }: DiscardLeadModalProps) {
+export function LeadDiscardModal({ leadId, onClose, form, setForm, onConfirm }: LeadDiscardModalProps) {
   const leads = useStore((state) => state.leads)
-  const leadName = leads.find(l => l.id === leadId)?.name
+  const leadData = leads.find(l => l.id === leadId)
+  const leadName = leadData ? `${leadData.firstName} ${leadData.lastName}` : ''
 
   return (
     <Dialog open={!!leadId} onOpenChange={(open) => !open && onClose()}>

@@ -41,11 +41,11 @@ export function LeadsTable({ leads, getAgentName, onViewDetail, onEdit, onConver
           <TableRow key={lead.id}>
             <TableCell>
               <div className="flex items-center gap-2">
-                <div className={cn("h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold", getAvatarColor(lead.name).bg, getAvatarColor(lead.name).text)}>
-                  {getInitials(lead.name)}
+                <div className={cn("h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold", getAvatarColor(lead.firstName + ' ' + lead.lastName).bg, getAvatarColor(lead.firstName + ' ' + lead.lastName).text)}>
+                  {getInitials(lead.firstName + ' ' + lead.lastName)}
                 </div>
                 <div>
-                  <p className="font-medium">{lead.name}</p>
+                  <p className="font-medium">{lead.firstName} {lead.lastName}</p>
                   <div className="flex items-center gap-3 text-xs text-neutral-500 mt-0.5">
                     <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{lead.email}</span>
                   </div>
