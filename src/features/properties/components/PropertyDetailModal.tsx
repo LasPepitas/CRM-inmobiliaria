@@ -31,15 +31,25 @@ export function PropertyDetailModal({
           <DialogTitle>{property.title}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-6">
-          <div
-            className={cn(
-              'h-48 bg-gradient-to-br rounded-lg flex items-center justify-center text-6xl',
-              gradient.from,
-              gradient.to,
-            )}
-          >
-            {gradient.icon}
-          </div>
+          {property.photos && property.photos[0] ? (
+            <div className="h-48 rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800">
+              <img
+                src={property.photos[0]}
+                alt={property.title}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ) : (
+            <div
+              className={cn(
+                'h-48 bg-gradient-to-br rounded-lg flex items-center justify-center text-6xl',
+                gradient.from,
+                gradient.to,
+              )}
+            >
+              {gradient.icon}
+            </div>
+          )}
           <div className="space-y-4">
             <div>
               <p className="text-xs uppercase text-neutral-500 mb-1">Precio</p>

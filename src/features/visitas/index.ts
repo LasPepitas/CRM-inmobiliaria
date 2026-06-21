@@ -1,4 +1,5 @@
 export { CalendarView, ListView } from './components/VisitasViews'
 export { NewVisitModal } from './components/NewVisitModal'
+export { ConnectCalendarButton } from './components/ConnectCalendarButton'
 export { useVisitas } from './hooks/useVisitas'
 export type { VisitStatus, NewVisitForm, Visit } from './types'

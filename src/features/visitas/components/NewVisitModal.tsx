@@ -123,6 +123,18 @@ export function NewVisitModal({
               className="mt-1"
             />
           </div>
+
+          <div>
+            <label className="text-sm font-medium">Ubicación</label>
+            <Input
+              id="visit-location"
+              placeholder="Dirección o punto de encuentro..."
+              value={form.location ?? ''}
+              onChange={e => field('location', e.target.value)}
+              className="mt-1"
+            />
+            <p className="text-xs text-neutral-400 mt-1">Opcional — se sincroniza con Google Calendar</p>
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>Cancelar</Button>
