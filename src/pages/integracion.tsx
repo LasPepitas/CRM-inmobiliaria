@@ -25,6 +25,7 @@ import {
   Plus,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ConnectCalendarButton } from '@/features/visitas'
 
 const integrations = [
   {
@@ -145,21 +146,25 @@ export function IntegracionPage() {
                           </p>
                         )}
                         <div className="flex gap-2 mt-4">
-                          <Button
-                            variant={integration.connected ? 'outline' : 'default'}
-                            size="sm"
-                            onClick={() => handleToggleIntegration(integration.id, integration.connected)}
-                          >
-                            {integration.connected ? (
-                              <>
-                                <XCircle className="h-4 w-4 mr-2" /> Desconectar
-                              </>
-                            ) : (
-                              <>
-                                <Plug className="h-4 w-4 mr-2" /> Conectar
-                              </>
-                            )}
-                          </Button>
+                          {integration.id === 'calendar' ? (
+                            <ConnectCalendarButton variant={integration.connected ? 'outline' : 'default'} />
+                          ) : (
+                            <Button
+                              variant={integration.connected ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => handleToggleIntegration(integration.id, integration.connected)}
+                            >
+                              {integration.connected ? (
+                                <>
+                                  <XCircle className="h-4 w-4 mr-2" /> Desconectar
+                                </>
+                              ) : (
+                                <>
+                                  <Plug className="h-4 w-4 mr-2" /> Conectar
+                                </>
+                              )}
+                            </Button>
+                          )}
                           {integration.connected && (
                             <Button variant="ghost" size="sm">
                               <RefreshCw className="h-4 w-4 mr-2" /> Sincronizar

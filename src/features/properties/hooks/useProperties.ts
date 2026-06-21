@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useStore } from '@/store'
 import type { Property } from '@/store/slices/propertiesSlice'
 import type { PropertyFormData } from '../types'
@@ -7,6 +7,9 @@ import { PROPERTY_FORM_DEFAULT } from '../types'
 export function useProperties() {
   const {
     properties,
+    propertiesLoading,
+    propertiesError,
+    fetchProperties,
     addProperty,
     updateProperty,
     deleteProperty,
@@ -25,6 +28,11 @@ export function useProperties() {
   const [editingPropertyId, setEditingPropertyId] = useState<string | null>(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [formData, setFormData] = useState<PropertyFormData>(PROPERTY_FORM_DEFAULT)
+
+  // Carga inicial desde el backend al montar el módulo
+  useEffect(() => {
+    fetchProperties()
+  }, [fetchProperties])
 
   const filteredProperties = useMemo(() =>
     properties.filter(p => {
@@ -57,42 +65,68 @@ export function useProperties() {
     setStatusFilter(prev => prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status])
   }
 
-  const handleSaveNew = () => {
+  const handleSaveNew = async () => {
     if (!formData.title || !formData.city) {
       addToast({ title: 'Error', description: 'Completá los campos obligatorios', variant: 'error' })
       return
     }
-    addProperty({
-      ...formData,
-      photos: [],
-      created_at: new Date().toISOString().split('T')[0],
-      views: 0,
-      interested: 0,
-    })
-    addToast({ title: 'Propiedad creada', description: `${formData.title} fue agregada correctamente`, variant: 'success' })
-    closeModal('addProperty')
-    setFormData(PROPERTY_FORM_DEFAULT)
+    try {
+      await addProperty(formData)
+      addToast({ title: 'Propiedad creada', description: `${formData.title} fue agregada correctamente`, variant: 'success' })
+      closeModal('addProperty')
+      setFormData(PROPERTY_FORM_DEFAULT)
+    } catch (err) {
+      addToast({
+        title: 'Error al crear propiedad',
+        description: err instanceof Error ? err.message : 'Intente nuevamente',
+        variant: 'error',
+      })
+    }
   }
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingPropertyId) return
-    updateProperty(editingPropertyId, formData)
-    addToast({ title: 'Propiedad actualizada', description: `${formData.title} fue modificada`, variant: 'success' })
-    setEditingPropertyId(null)
-    setFormData(PROPERTY_FORM_DEFAULT)
+    try {
+      await updateProperty(editingPropertyId, formData)
+      addToast({ title: 'Propiedad actualizada', description: `${formData.title} fue modificada`, variant: 'success' })
+      setEditingPropertyId(null)
+      setFormData(PROPERTY_FORM_DEFAULT)
+    } catch (err) {
+      addToast({
+        title: 'Error al actualizar propiedad',
+        description: err instanceof Error ? err.message : 'Intente nuevamente',
+        variant: 'error',
+      })
+    }
   }
 
-  const handleArchive = (id: string) => {
+  const handleArchive = async (id: string) => {
     const prop = properties.find(p => p.id === id)
-    archiveProperty(id)
-    addToast({ title: 'Propiedad archivada', description: `${prop?.title} fue archivada`, variant: 'success' })
+    try {
+      await archiveProperty(id)
+      addToast({ title: 'Propiedad archivada', description: `${prop?.title} fue archivada`, variant: 'success' })
+    } catch (err) {
+      addToast({
+        title: 'Error al archivar propiedad',
+        description: err instanceof Error ? err.message : 'Intente nuevamente',
+        variant: 'error',
+      })
+    }
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     const prop = properties.find(p => p.id === id)
-    deleteProperty(id)
-    addToast({ title: 'Propiedad eliminada', description: `${prop?.title} fue eliminada`, variant: 'success' })
-    setDeleteConfirmId(null)
+    try {
+      await deleteProperty(id)
+      addToast({ title: 'Propiedad eliminada', description: `${prop?.title} fue eliminada`, variant: 'success' })
+      setDeleteConfirmId(null)
+    } catch (err) {
+      addToast({
+        title: 'Error al eliminar propiedad',
+        description: err instanceof Error ? err.message : 'Intente nuevamente',
+        variant: 'error',
+      })
+    }
   }
 
   const openEditModal = (property: Property) => {
@@ -106,13 +140,47 @@ export function useProperties() {
       bedrooms: property.bedrooms,
       bathrooms: property.bathrooms,
       status: property.status,
+      imageUrl: property.photos?.[0] || '',
+      isPublished: property.isPublished,
     })
     setEditingPropertyId(property.id)
+  }
+
+  const handleTogglePublish = async (property: Property) => {
+    try {
+      const formDataToUpdate: PropertyFormData = {
+        title: property.title,
+        type: property.type,
+        price: property.price,
+        city: property.city,
+        neighborhood: property.neighborhood,
+        area_m2: property.area_m2,
+        bedrooms: property.bedrooms,
+        bathrooms: property.bathrooms,
+        status: property.status,
+        imageUrl: property.photos?.[0] || '',
+        isPublished: !property.isPublished,
+      }
+      await updateProperty(property.id, formDataToUpdate)
+      addToast({
+        title: property.isPublished ? 'Propiedad despublicada' : 'Propiedad publicada',
+        description: `${property.title} cambió su estado de publicación`,
+        variant: 'success',
+      })
+    } catch (err) {
+      addToast({
+        title: 'Error al cambiar estado de publicación',
+        description: err instanceof Error ? err.message : 'Intente nuevamente',
+        variant: 'error',
+      })
+    }
   }
 
   return {
     // state
     properties,
+    propertiesLoading,
+    propertiesError,
     filteredProperties,
     selectedProperty,
     editingProperty,
@@ -129,6 +197,7 @@ export function useProperties() {
     setDeleteConfirmId,
     setEditingPropertyId,
     // actions
+    fetchProperties,
     openModal,
     closeModal,
     setActivePage,
@@ -139,5 +208,6 @@ export function useProperties() {
     handleArchive,
     handleDelete,
     openEditModal,
+    handleTogglePublish,
   }
 }

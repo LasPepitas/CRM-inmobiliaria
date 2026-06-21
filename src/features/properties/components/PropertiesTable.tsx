@@ -27,6 +27,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
+import { Switch } from '@/components/ui/switch'
 
 interface PropertiesTableProps {
   properties: Property[]
@@ -41,6 +42,7 @@ interface PropertiesTableProps {
   onEdit: (property: Property) => void
   onArchive: (id: string) => void
   onDeleteConfirm: (id: string) => void
+  onTogglePublish: (property: Property) => void
 }
 
 export function PropertiesTable({
@@ -55,6 +57,7 @@ export function PropertiesTable({
   onEdit,
   onArchive,
   onDeleteConfirm,
+  onTogglePublish,
 }: PropertiesTableProps) {
   return (
     <div className="space-y-4">
@@ -123,13 +126,14 @@ export function PropertiesTable({
             <TableHead>Dorm.</TableHead>
             <TableHead>Baños</TableHead>
             <TableHead>Estado</TableHead>
+            <TableHead>Publicado</TableHead>
             <TableHead className="w-[80px]" />
           </TableRow>
         </TableHeader>
         <TableBody>
           {properties.length === 0 ? (
             <tr>
-              <TableCell colSpan={9} className="h-48 text-center">
+              <TableCell colSpan={10} className="h-48 text-center">
                 <div className="flex flex-col items-center justify-center gap-3">
                   <div className="h-16 w-16 rounded-full bg-neutral-100 flex items-center justify-center">
                     <Building2 className="h-8 w-8 text-neutral-400" />
@@ -148,15 +152,23 @@ export function PropertiesTable({
                 <TableRow key={property.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <div
-                        className={cn(
-                          'h-10 w-14 rounded-md bg-gradient-to-br flex items-center justify-center text-lg',
-                          gradient.from,
-                          gradient.to,
-                        )}
-                      >
-                        {gradient.icon}
-                      </div>
+                      {property.photos && property.photos[0] ? (
+                        <img
+                          src={property.photos[0]}
+                          alt={property.title}
+                          className="h-10 w-14 rounded-md object-cover border border-neutral-200 dark:border-neutral-800"
+                        />
+                      ) : (
+                        <div
+                          className={cn(
+                            'h-10 w-14 rounded-md bg-gradient-to-br flex items-center justify-center text-lg',
+                            gradient.from,
+                            gradient.to,
+                          )}
+                        >
+                          {gradient.icon}
+                        </div>
+                      )}
                       <span className="font-medium">{property.title}</span>
                     </div>
                   </TableCell>
@@ -190,6 +202,14 @@ export function PropertiesTable({
                     <Badge variant={statusBadgeVariant[property.status]}>
                       {property.status}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={property.isPublished}
+                      onCheckedChange={() => onTogglePublish(property)}
+                      checkedClass="bg-success-500"
+                      uncheckedClass="bg-error-500"
+                    />
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

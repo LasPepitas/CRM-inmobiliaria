@@ -476,6 +476,8 @@ export function AjustesPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+
       </Tabs>
     </div>
   )
