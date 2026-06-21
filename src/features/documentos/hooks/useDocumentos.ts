@@ -41,7 +41,10 @@ export function useDocumentos() {
   const activeFilters = [typeFilter, statusFilter, docSearch].filter(Boolean).length
 
   const getPropertyTitle = (propertyId: string) => properties.find(p => p.id === propertyId)?.title || 'Propiedad'
-  const getLeadName = (leadId: string | null | undefined) => leadId ? leads.find(l => l.id === leadId)?.name || '-' : '-'
+  const getLeadName = (leadId: string | null | undefined) => {
+    const l = leadId ? leads.find(l => l.id === leadId) : null
+    return l ? `${l.firstName} ${l.lastName}`.trim() : '-'
+  }
 
   const selectedLead = useMemo(() => leads.find(l => l.id === wizardData.lead_id), [leads, wizardData.lead_id])
   const selectedDeal = useMemo(() => deals.find(d => d.id === wizardData.deal_id), [deals, wizardData.deal_id])
@@ -121,7 +124,7 @@ export function useDocumentos() {
   const handleFinishWizard = () => {
     const newDocument: ApiDocument = {
       id: `local-${Date.now()}`,
-      name: `Contrato de ${wizardData.type === 'compra' ? 'Compraventa' : 'Alquiler'} - ${selectedLead?.name}`,
+      name: `Contrato de ${wizardData.type === 'compra' ? 'Compraventa' : 'Alquiler'} - ${selectedLead ? `${selectedLead.firstName} ${selectedLead.lastName}`.trim() : 'Desconocido'}`,
       type: 'Contrato',
       property_id: selectedProp?.id || '',
       leadId: selectedLead?.id || null,

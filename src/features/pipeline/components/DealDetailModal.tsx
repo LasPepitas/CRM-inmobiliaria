@@ -53,7 +53,7 @@ export function DealDetailModal({
                   <User className="h-4 w-4" /> Cliente
                 </h4>
                 <div className="space-y-2 text-sm">
-                  <p className="font-medium text-base">{lead?.name || 'Cliente desconocido'}</p>
+                  <p className="font-medium text-base">{lead ? `${lead.firstName} ${lead.lastName}`.trim() : 'Cliente desconocido'}</p>
                   {lead?.phone && (
                     <p className="flex items-center gap-2 text-neutral-600">
                       <Phone className="h-3.5 w-3.5" /> {lead.phone}

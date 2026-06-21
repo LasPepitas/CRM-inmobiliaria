@@ -67,12 +67,12 @@ export function WhatsAppPage() {
                 >
                   <Avatar className="h-10 w-10 shrink-0">
                     <AvatarFallback className={isActive ? 'bg-primary text-white' : 'bg-neutral-200'}>
-                      {getInitials(lead.name)}
+                      {getInitials(`${lead.firstName} ${lead.lastName}`.trim())}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-baseline mb-0.5">
-                      <span className="font-semibold text-sm truncate">{lead.name}</span>
+                      <span className="font-semibold text-sm truncate">{`${lead.firstName} ${lead.lastName}`.trim()}</span>
                       {lastMessage && (
                         <span className="text-[10px] text-neutral-500 shrink-0 ml-2">
                           {new Date(lastMessage.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -104,10 +104,10 @@ export function WhatsAppPage() {
               <div className="h-16 px-4 flex items-center justify-between bg-surface-container-lowest border-b border-outline-variant/50 shrink-0 shadow-sm z-10">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-primary/10 text-primary">{getInitials(activeLeadData.name)}</AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary">{getInitials(`${activeLeadData.firstName} ${activeLeadData.lastName}`.trim())}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <h3 className="font-semibold leading-none">{activeLeadData.name}</h3>
+                    <h3 className="font-semibold leading-none">{`${activeLeadData.firstName} ${activeLeadData.lastName}`.trim()}</h3>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-neutral-500">{activeLeadData.phone}</span>
                       <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">{activeLeadData.stage}</Badge>
@@ -129,7 +129,7 @@ export function WhatsAppPage() {
                 {activeChat.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-neutral-500 opacity-60">
                     <MessageCircle className="h-12 w-12 mb-3" />
-                    <p>Iniciá la conversación con {activeLeadData.name}</p>
+                    <p>Iniciá la conversación con {`${activeLeadData.firstName} ${activeLeadData.lastName}`.trim()}</p>
                   </div>
                 ) : activeChat.map((msg) => {
                   const isAgent = msg.sender === 'agent'

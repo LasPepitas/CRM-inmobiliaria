@@ -22,7 +22,7 @@ export function useWhatsApp() {
 
   const chatList = useMemo(
     () => leads
-      .filter(l => !!l.phone && l.name.toLowerCase().includes(search.toLowerCase()))
+      .filter(l => !!l.phone && `${l.firstName} ${l.lastName}`.trim().toLowerCase().includes(search.toLowerCase()))
       .sort((a, b) => {
         const chatA = whatsappChats[a.id]
         const chatB = whatsappChats[b.id]

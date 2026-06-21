@@ -247,7 +247,7 @@ export function DocumentosPage() {
                 <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Sin lead vinculado" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">Sin lead vinculado</SelectItem>
-                  {leads.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
+                  {leads.map(l => <SelectItem key={l.id} value={l.id}>{`${l.firstName} ${l.lastName}`.trim()}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -281,7 +281,7 @@ export function DocumentosPage() {
                   <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Seleccionar lead..." /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">Seleccionar lead...</SelectItem>
-                    {leads.map(l => <SelectItem key={l.id} value={l.id}>{l.name} — {l.email}</SelectItem>)}
+                    {leads.map(l => <SelectItem key={l.id} value={l.id}>{`${l.firstName} ${l.lastName}`.trim()} — {l.email}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -365,7 +365,7 @@ export function DocumentosPage() {
                 <div className="space-y-6 text-sm leading-relaxed">
                   <p>
                     Entre <strong>GRUPO SIENA INMOBILIARIA</strong>, en adelante EL {wizardData.type === 'compra' ? 'VENDEDOR' : 'LOCADOR'},
-                    y por la otra parte <strong>{selectedLead?.name?.toUpperCase()}</strong>, con DNI ________________,
+                    y por la otra parte <strong>{selectedLead ? `${selectedLead.firstName} ${selectedLead.lastName}`.trim().toUpperCase() : ''}</strong>, con DNI ________________,
                     email: {selectedLead?.email}, teléfono: {selectedLead?.phone}, en adelante EL {wizardData.type === 'compra' ? 'COMPRADOR' : 'LOCATARIO'},
                     se conviene celebrar el presente contrato sujeto a las siguientes cláusulas:
                   </p>
@@ -397,7 +397,7 @@ export function DocumentosPage() {
                     </div>
                     <div className="text-center">
                       <div className="border-t border-black w-48 mb-2" />
-                      <p className="font-bold">{selectedLead?.name?.toUpperCase()}</p>
+                      <p className="font-bold">{selectedLead ? `${selectedLead.firstName} ${selectedLead.lastName}`.trim().toUpperCase() : ''}</p>
                       <p className="text-xs">DNI: ________________</p>
                     </div>
                   </div>
