@@ -1,8 +1,8 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { UserPlus, Search, DollarSign, Building2, TrendingUp } from 'lucide-react'
-import { formatCurrency } from '@/lib/utils'
+import { UserPlus, Search, DollarSign, Building2, TrendingUp, RotateCw } from 'lucide-react'
+import { cn, formatCurrency } from '@/lib/utils'
 import { AgentCard, AgentFormModal, DeleteAgentDialog, AgentEmptyState, useEquipo } from '@/features/equipo'
 
 export function EquipoPage() {
@@ -27,6 +27,8 @@ export function EquipoPage() {
     handleEdit,
     handleDelete,
     getAgentMetrics,
+    loadingAgents,
+    refreshAgents,
   } = useEquipo()
 
   const deleteMetrics = deleteTargetAgent ? getAgentMetrics(deleteTargetAgent.id) : { activeDeals: 0, agentLeads: 0, totalValue: 0 }
@@ -76,16 +78,27 @@ export function EquipoPage() {
         </Card>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-        <Input
-          id="agent-search"
-          placeholder="Buscar por nombre, email o rol..."
-          className="pl-9"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+      {/* Search and Refresh */}
+      <div className="flex items-center gap-3">
+        <div className="relative max-w-sm flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+          <Input
+            id="agent-search"
+            placeholder="Buscar por nombre, email o rol..."
+            className="pl-9"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={refreshAgents}
+          disabled={loadingAgents}
+          title="Refrescar asesores"
+        >
+          <RotateCw className={cn("h-4 w-4", loadingAgents && "animate-spin")} />
+        </Button>
       </div>
 
       {/* Agent grid */}
