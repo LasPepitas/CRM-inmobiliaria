@@ -51,3 +51,9 @@ export const useStore = create<Store>((...a) => ({
   ...createWhatsAppSlice(...a),
   ...createUISlice(...a),
 }))
+
+const initialState = useStore.getState()
+
+export const resetStore = () => {
+  useStore.setState(initialState, true)
+}
