@@ -85,18 +85,18 @@ export function DealDetailModal({
                   Detalles del Negocio
                 </h4>
                 <div className="space-y-2 text-sm">
-                  <p className="flex justify-between">
+                  <div className="flex justify-between">
                     <span className="text-neutral-500">Valor:</span>
                     <span className="font-bold text-base">{formatCurrency(deal.value)}</span>
-                  </p>
-                  <p className="flex justify-between items-center">
+                  </div>
+                  <div className="flex justify-between items-center">
                     <span className="text-neutral-500">Probabilidad:</span>
                     <Badge variant={probabilityVariant(deal.probability)}>{deal.probability}%</Badge>
-                  </p>
-                  <p className="flex justify-between">
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-neutral-500">Cierre est.:</span>
                     <span className="font-medium">{formatDate(deal.expected_close)}</span>
-                  </p>
+                  </div>
                 </div>
               </div>
             </div>
