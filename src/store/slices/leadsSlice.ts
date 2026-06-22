@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand'
 import type { Store } from '../index'
 import type { Lead } from '../../features/leads/types'
-import { leadsApi } from '../../features/leads/api/leadsApi'
+import { LeadsService } from '../../features/leads/services/LeadsService'
 
 export interface LeadsSlice {
   leads: Lead[]
@@ -22,7 +22,7 @@ export const createLeadsSlice: StateCreator<Store, [], [], LeadsSlice> = (set) =
   fetchLeads: async () => {
     set({ loadingLeads: true })
     try {
-      const leads = await leadsApi.getAll()
+      const leads = await LeadsService.getAll()
       set({ leads })
     } catch (error) {
       console.error('Failed to fetch leads:', error)
@@ -33,7 +33,7 @@ export const createLeadsSlice: StateCreator<Store, [], [], LeadsSlice> = (set) =
 
   addLead: async (lead) => {
     try {
-      const newLead = await leadsApi.create(lead)
+      const newLead = await LeadsService.create(lead)
       set((state) => ({ leads: [newLead, ...state.leads] }))
     } catch (error) {
       console.error('Failed to create lead:', error)
@@ -43,7 +43,7 @@ export const createLeadsSlice: StateCreator<Store, [], [], LeadsSlice> = (set) =
 
   updateLead: async (id, updates) => {
     try {
-      const updatedLead = await leadsApi.update(id, updates)
+      const updatedLead = await LeadsService.update(id, updates)
       set((state) => ({
         leads: state.leads.map(l => l.id === id ? updatedLead : l)
       }))
@@ -55,7 +55,7 @@ export const createLeadsSlice: StateCreator<Store, [], [], LeadsSlice> = (set) =
 
   deleteLead: async (id) => {
     try {
-      await leadsApi.remove(id)
+      await LeadsService.remove(id)
       set((state) => ({
         leads: state.leads.filter(l => l.id !== id)
       }))
@@ -67,7 +67,7 @@ export const createLeadsSlice: StateCreator<Store, [], [], LeadsSlice> = (set) =
 
   updateLeadPayment: async (id, config) => {
     try {
-      const updatedLead = await leadsApi.configurePayment(id, config)
+      const updatedLead = await LeadsService.configurePayment(id, config)
       set((state) => ({
         leads: state.leads.map(l => l.id === id ? updatedLead : l)
       }))
@@ -79,7 +79,7 @@ export const createLeadsSlice: StateCreator<Store, [], [], LeadsSlice> = (set) =
 
   discardLead: async (id, reason, notes) => {
     try {
-      const updatedLead = await leadsApi.discard(id, reason, notes)
+      const updatedLead = await LeadsService.discard(id, reason, notes)
       set((state) => ({
         leads: state.leads.map(l => l.id === id ? updatedLead : l),
         deals: state.deals.map(d => d.lead_id === id
@@ -95,7 +95,7 @@ export const createLeadsSlice: StateCreator<Store, [], [], LeadsSlice> = (set) =
 
   reactivateLead: async (id) => {
     try {
-      const updatedLead = await leadsApi.reactivate(id)
+      const updatedLead = await LeadsService.reactivate(id)
       set((state) => ({
         leads: state.leads.map(l => l.id === id ? updatedLead : l),
         deals: state.deals.map(d => d.lead_id === id && d.stage === 'Cancelado'

@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
 import type { Store } from '@/store'
-import { agentsApi } from '@/features/leads/api/agentsApi'
+import { AgentsService } from '@/features/equipo/services/AgentsService'
 
 export interface Agent {
   id: string
@@ -18,8 +18,9 @@ export interface Agent {
 export interface AgentsSlice {
   agents: Agent[]
   loadingAgents: boolean
+  hasFetchedAgents: boolean
   fetchAgents: () => Promise<void>
-  addAgent: (agent: Omit<Agent, 'id'>) => void
+  addAgent: (agent: { email: string; password?: string; firstName: string; lastName: string; role: string }) => Promise<void>
   updateAgent: (id: string, agent: Partial<Agent>) => void
   deleteAgent: (id: string) => void
 }
@@ -27,20 +28,24 @@ export interface AgentsSlice {
 export const createAgentsSlice: StateCreator<Store, [], [], AgentsSlice> = (set) => ({
   agents: [],
   loadingAgents: false,
+  hasFetchedAgents: false,
   fetchAgents: async () => {
     set({ loadingAgents: true })
     try {
-      const agents = await agentsApi.getAll()
-      set({ agents })
+      const agents = await AgentsService.getAll()
+      set({ agents, hasFetchedAgents: true })
     } catch (error) {
       console.error('Failed to fetch agents:', error)
     } finally {
       set({ loadingAgents: false })
     }
   },
-  addAgent: (agent) => set((state) => ({
-    agents: [...state.agents, { ...agent, id: String(Date.now()) }]
-  })),
+  addAgent: async (agent) => {
+    const newAgent = await AgentsService.create(agent)
+    set((state) => ({
+      agents: [...state.agents, newAgent]
+    }))
+  },
   updateAgent: (id, updates) => set((state) => ({
     agents: state.agents.map(a => a.id === id ? { ...a, ...updates } : a)
   })),

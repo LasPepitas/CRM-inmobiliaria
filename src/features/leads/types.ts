@@ -29,3 +29,34 @@ export interface Lead {
 export type LeadStage = Lead['stage']
 export type LeadSource = Lead['source']
 export type LeadStatus = Lead['status']
+
+export interface LeadApiResponse {
+  id: string
+  firstName?: string
+  lastName?: string
+  source?: string
+  phone?: string
+  email?: string
+  stage?: string
+  advisorId?: string
+  score?: number
+  lastContact?: string
+  budget?: number | string
+  notes?: string
+  paymentConfig?: LeadPaymentConfig
+  status?: string
+  discardReason?: string
+  discardedAt?: string
+}
+
+export interface ConvertLeadPayload {
+  property_id: string
+  value: number
+  probability: number
+  expected_close: string
+}
+
+export interface ApiResponse<T> {
+  success: boolean
+  data: T
+}
