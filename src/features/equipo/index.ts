@@ -1,3 +1,7 @@
-export { AgentCard, AgentFormModal, DeleteAgentDialog, AgentEmptyState } from './components/EquipoComponents'
+export { AgentCard } from './components/AgentCard'
+export { AgentFormModal } from './components/AgentFormModal'
+export { DeleteAgentDialog } from './components/DeleteAgentDialog'
+export { AgentEmptyState } from './components/AgentEmptyState'
 export { useEquipo } from './hooks/useEquipo'
+export { useAgents } from './hooks/useAgents'
 export type { AgentFormData, AgentRole } from './types'
