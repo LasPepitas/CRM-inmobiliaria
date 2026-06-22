@@ -14,14 +14,14 @@ export interface Lead {
   source: 'Web' | 'Referido' | 'Contacto' | 'Redes' | 'Expo'
   phone: string
   email: string
-  stage: 'Nuevo' | 'Contactado' | 'Visita' | 'Negociacion' | 'Cierre'
+  stage: 'NUEVO' | 'CONTACTADO' | 'VISITA' | 'NEGOCIACION' | 'CIERRE'
   assigned_agent: string
   score: number
   last_contact: string
   budget: number
   notes: string
   payment_config?: LeadPaymentConfig
-  status: 'Activo' | 'No Interesado' | 'Pausado'
+  status: 'Activo' | 'No Interesado' | 'Pausado' | 'Convertido'
   discard_reason?: string
   discarded_at?: string
 }

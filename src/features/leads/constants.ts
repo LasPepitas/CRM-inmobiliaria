@@ -8,3 +8,5 @@ export const stageColors: Record<string, string> = {
 }
 
 export const sourceOptions = ['Web', 'Referido', 'Contacto', 'Redes', 'Expo'] as const
+
+export const stageOptions = ['NUEVO', 'CONTACTADO', 'VISITA', 'NEGOCIACION', 'CIERRE'] as const
