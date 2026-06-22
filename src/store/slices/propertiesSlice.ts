@@ -25,6 +25,7 @@ export interface PropertiesSlice {
   properties: Property[]
   propertiesLoading: boolean
   propertiesError: string | null
+  propertiesFetched: boolean
 
   fetchProperties: () => Promise<void>
   addProperty: (formData: PropertyFormData) => Promise<void>
@@ -37,12 +38,13 @@ export const createPropertiesSlice: StateCreator<Store, [], [], PropertiesSlice>
   properties: [],
   propertiesLoading: false,
   propertiesError: null,
+  propertiesFetched: false,
 
   fetchProperties: async () => {
     set({ propertiesLoading: true, propertiesError: null })
     try {
       const data = await propertiesApi.getAll()
-      set({ properties: data.map(toProperty), propertiesLoading: false })
+      set({ properties: data.map(toProperty), propertiesLoading: false, propertiesFetched: true })
     } catch (err) {
       set({
         propertiesError: err instanceof Error ? err.message : 'Error al cargar propiedades',

@@ -6,6 +6,7 @@ import { leadsApi } from '../../features/leads/api/leadsApi'
 export interface LeadsSlice {
   leads: Lead[]
   loadingLeads: boolean
+  leadsFetched: boolean
   fetchLeads: () => Promise<void>
   addLead: (lead: Omit<Lead, 'id'>) => Promise<void>
   updateLead: (id: string, lead: Partial<Lead>) => Promise<void>
@@ -18,12 +19,13 @@ export interface LeadsSlice {
 export const createLeadsSlice: StateCreator<Store, [], [], LeadsSlice> = (set) => ({
   leads: [],
   loadingLeads: false,
+  leadsFetched: false,
   
   fetchLeads: async () => {
     set({ loadingLeads: true })
     try {
       const leads = await leadsApi.getAll()
-      set({ leads })
+      set({ leads, leadsFetched: true })
     } catch (error) {
       console.error('Failed to fetch leads:', error)
     } finally {

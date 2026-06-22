@@ -18,6 +18,7 @@ export interface Agent {
 export interface AgentsSlice {
   agents: Agent[]
   loadingAgents: boolean
+  agentsFetched: boolean
   fetchAgents: () => Promise<void>
   addAgent: (agent: Omit<Agent, 'id'>) => void
   updateAgent: (id: string, agent: Partial<Agent>) => void
@@ -27,11 +28,12 @@ export interface AgentsSlice {
 export const createAgentsSlice: StateCreator<Store, [], [], AgentsSlice> = (set) => ({
   agents: [],
   loadingAgents: false,
+  agentsFetched: false,
   fetchAgents: async () => {
     set({ loadingAgents: true })
     try {
       const agents = await agentsApi.getAll()
-      set({ agents })
+      set({ agents, agentsFetched: true })
     } catch (error) {
       console.error('Failed to fetch agents:', error)
     } finally {

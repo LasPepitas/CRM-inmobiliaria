@@ -4,17 +4,27 @@ import { useMemo, useEffect } from 'react'
 export function useLeadsData(search: string, stageFilter: string[]) {
   const leads = useStore((state) => state.leads)
   const loadingLeads = useStore((state) => state.loadingLeads)
+  const leadsFetched = useStore((state) => state.leadsFetched)
+  const agentsFetched = useStore((state) => state.agentsFetched)
   const fetchLeads = useStore((state) => state.fetchLeads)
   const fetchAgents = useStore((state) => state.fetchAgents)
   
   useEffect(() => {
-    fetchLeads()
-    fetchAgents()
-  }, [fetchLeads, fetchAgents])
+    if (!leadsFetched) fetchLeads()
+    if (!agentsFetched) fetchAgents()
+  }, [fetchLeads, fetchAgents, leadsFetched, agentsFetched])
   
   
-  const activeLeads = useMemo(() => leads.filter(l => l.status === 'Activo'), [leads])
-  const discardedLeads = useMemo(() => leads.filter(l => l.status === 'No Interesado' || l.status === 'Pausado'), [leads])
+  const activeLeads = useMemo(() => {
+    return leads
+      .filter(l => l.status === 'Activo' || l.status === 'Convertido')
+      .sort((a, b) => {
+        if (a.status === 'Convertido' && b.status !== 'Convertido') return 1
+        if (b.status === 'Convertido' && a.status !== 'Convertido') return -1
+        return 0
+      })
+  }, [leads])
+  const discardedLeads = useMemo(() => leads.filter(l => l.status === 'No Interesado'), [leads])
 
   const filteredLeads = useMemo(() => {
     return activeLeads.filter(lead => {
@@ -29,6 +39,7 @@ export function useLeadsData(search: string, stageFilter: string[]) {
     activeLeads,
     discardedLeads,
     filteredLeads,
-    loadingLeads
+    loadingLeads,
+    refresh: fetchLeads
   }
 }
