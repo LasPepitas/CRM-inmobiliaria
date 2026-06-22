@@ -15,15 +15,12 @@ interface AgentApiResponse {
   dni?: string
 }
 
-interface ApiResponse<T> {
-  success: boolean
-  data: T
-}
+
 
 export const agentsApi = {
   getAll: async (): Promise<Agent[]> => {
-    const response = await apiClient.get<ApiResponse<AgentApiResponse[]>>('/users/advisors')
-    const agentsArray = response.data.data || []
+    const response = await apiClient.get<AgentApiResponse[]>('/users/advisors')
+    const agentsArray = response || []
 
     return agentsArray.map((apiAgent) => ({
       id: apiAgent.id,

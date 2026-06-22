@@ -29,10 +29,7 @@ interface ConvertLeadPayload {
   expected_close: string
 }
 
-interface ApiResponse<T> {
-  success: boolean
-  data: T
-}
+
 
 // ─── Endpoints ────────────────────────────────────────────────────────────────
 
@@ -43,8 +40,8 @@ export const leadsApi = {
     if (stage && stage.length > 0) params.stage = stage.join(',')
     if (search) params.search = search
 
-    const response = await apiClient.get<ApiResponse<LeadApiResponse[]>>('/leads', { params })
-    return (response.data.data || []).map(adaptExternalLead)
+    const response = await apiClient.get<LeadApiResponse[]>('/leads', params)
+    return (response || []).map(adaptExternalLead)
   },
 
   create: async (leadData: Partial<Lead>): Promise<Lead> => {
@@ -59,8 +56,8 @@ export const leadsApi = {
       notes: leadData.notes,
       assigned_agent: leadData.assigned_agent,
     }
-    const response = await apiClient.post<ApiResponse<LeadApiResponse>>('/leads', payload)
-    return adaptExternalLead(response.data.data)
+    const response = await apiClient.post<LeadApiResponse>('/leads', payload)
+    return adaptExternalLead(response)
   },
 
   update: async (id: string, leadData: Partial<Lead>): Promise<Lead> => {
@@ -78,31 +75,31 @@ export const leadsApi = {
       stage: leadData.stage,
       status: leadData.status ? statusMap[leadData.status] : undefined,
     }
-    const response = await apiClient.put<ApiResponse<LeadApiResponse>>(`/leads/${id}`, payload)
-    return adaptExternalLead(response.data.data)
+    const response = await apiClient.put<LeadApiResponse>(`/leads/${id}`, payload)
+    return adaptExternalLead(response)
   },
 
   remove: async (id: string): Promise<void> => {
-    await apiClient.delete<ApiResponse<void>>(`/leads/${id}`)
+    await apiClient.delete<void>(`/leads/${id}`)
   },
 
   discard: async (id: string, reason: string, notes?: string): Promise<Lead> => {
-    const response = await apiClient.post<ApiResponse<LeadApiResponse>>(`/leads/${id}/discard`, { reason, notes })
-    return adaptExternalLead(response.data.data)
+    const response = await apiClient.post<LeadApiResponse>(`/leads/${id}/discard`, { reason, notes })
+    return adaptExternalLead(response)
   },
 
   reactivate: async (id: string): Promise<Lead> => {
-    const response = await apiClient.post<ApiResponse<LeadApiResponse>>(`/leads/${id}/reactivate`, {})
-    return adaptExternalLead(response.data.data)
+    const response = await apiClient.post<LeadApiResponse>(`/leads/${id}/reactivate`, {})
+    return adaptExternalLead(response)
   },
 
   configurePayment: async (id: string, config: LeadPaymentConfig): Promise<Lead> => {
-    const response = await apiClient.put<ApiResponse<LeadApiResponse>>(`/leads/${id}/payment-config`, config)
-    return adaptExternalLead(response.data.data)
+    const response = await apiClient.put<LeadApiResponse>(`/leads/${id}/payment-config`, config)
+    return adaptExternalLead(response)
   },
 
   convertToDeal: async (id: string, payload: ConvertLeadPayload): Promise<unknown> => {
-    const response = await apiClient.post<ApiResponse<unknown>>(`/leads/${id}/convert`, payload)
-    return response.data.data
+    const response = await apiClient.post<unknown>(`/leads/${id}/convert`, payload)
+    return response
   }
 }
