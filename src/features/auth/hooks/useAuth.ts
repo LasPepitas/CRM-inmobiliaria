@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/authSlice'
 import { loginApi, registerApi, getProfileApi } from '../services/authService'
 import type { LoginRequest, RegisterRequest } from '../types'
 import { ROUTE_ROLES } from '../types'
+import { resetStore } from '@/store'
 
 export function useAuth() {
   const { authUser, isAuthenticated, isLoading, setAuthUser, setLoading, logout } = useAuthStore()
@@ -36,6 +37,7 @@ export function useAuth() {
   useEffect(() => {
     const handleLogoutEvent = () => {
       logout()
+      resetStore()
     }
     window.addEventListener('auth:logout', handleLogoutEvent)
     return () => {
@@ -98,6 +100,7 @@ export function useAuth() {
 
   const handleLogout = useCallback(() => {
     logout()
+    resetStore()
   }, [logout])
 
   const hasRoutePermission = useCallback((route: string) => {

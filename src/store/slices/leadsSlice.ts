@@ -6,6 +6,7 @@ import { LeadsService } from '../../features/leads/services/LeadsService'
 export interface LeadsSlice {
   leads: Lead[]
   loadingLeads: boolean
+  leadsFetched: boolean
   fetchLeads: () => Promise<void>
   addLead: (lead: Omit<Lead, 'id'>) => Promise<void>
   updateLead: (id: string, lead: Partial<Lead>) => Promise<void>
@@ -18,6 +19,7 @@ export interface LeadsSlice {
 export const createLeadsSlice: StateCreator<Store, [], [], LeadsSlice> = (set) => ({
   leads: [],
   loadingLeads: false,
+  leadsFetched: false,
   
   fetchLeads: async () => {
     set({ loadingLeads: true })

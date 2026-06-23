@@ -22,6 +22,7 @@ export interface VisitsSlice {
   visits: Visit[]
   visitsLoading: boolean
   visitsError: string | null
+  visitsFetched: boolean
 
   fetchVisits: () => Promise<void>
   addVisit: (form: NewVisitForm & { title?: string }, propertyTitle?: string) => Promise<void>
@@ -33,12 +34,13 @@ export const createVisitsSlice: StateCreator<Store, [], [], VisitsSlice> = (set)
   visits: [],
   visitsLoading: false,
   visitsError: null,
+  visitsFetched: false,
 
   fetchVisits: async () => {
     set({ visitsLoading: true, visitsError: null })
     try {
       const data = await appointmentsApi.getAll()
-      set({ visits: data.map(toVisit), visitsLoading: false })
+      set({ visits: data.map(toVisit), visitsLoading: false, visitsFetched: true })
     } catch (err) {
       set({
         visitsError: err instanceof Error ? err.message : 'Error al cargar visitas',

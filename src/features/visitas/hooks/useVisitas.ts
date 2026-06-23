@@ -22,10 +22,12 @@ export function useVisitas() {
   const [showNewVisitModal, setShowNewVisitModal] = useState(false)
   const [newVisit, setNewVisit] = useState<NewVisitForm>(NEW_VISIT_DEFAULT)
 
+  const visitsFetched = useStore(state => state.visitsFetched)
+
   // Carga inicial desde el backend al montar el módulo
   useEffect(() => {
-    fetchVisits()
-  }, [fetchVisits])
+    if (!visitsFetched) fetchVisits()
+  }, [fetchVisits, visitsFetched])
 
   const filteredVisits = useMemo(
     () => visits.filter((v) => {

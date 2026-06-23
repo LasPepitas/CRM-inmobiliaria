@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useStore } from '@/store'
 import {
   Dialog,
@@ -16,6 +17,7 @@ interface LeadConvertForm {
   value: number
   probability: number
   expected_close: string
+  stage: string
 }
 
 interface LeadConvertModalProps {
@@ -29,6 +31,14 @@ interface LeadConvertModalProps {
 export function LeadConvertModal({ leadId, onClose, form, setForm, onConfirm }: LeadConvertModalProps) {
   const leads = useStore((state) => state.leads)
   const properties = useStore((state) => state.properties)
+  const propertiesFetched = useStore((state) => state.propertiesFetched)
+  const fetchProperties = useStore((state) => state.fetchProperties)
+
+  useEffect(() => {
+    if (leadId && !propertiesFetched) {
+      fetchProperties()
+    }
+  }, [leadId, propertiesFetched, fetchProperties])
 
   const lead = leads.find(l => l.id === leadId)
 
@@ -41,7 +51,7 @@ export function LeadConvertModal({ leadId, onClose, form, setForm, onConfirm }: 
             Convertir a Negocio
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-3">
           <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-primary/80">
             <strong>{lead?.firstName} {lead?.lastName}</strong> pasará al pipeline de ventas.
           </div>
@@ -56,6 +66,20 @@ export function LeadConvertModal({ leadId, onClose, form, setForm, onConfirm }: 
                 {properties.map(p => (
                   <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Etapa inicial del negocio *</label>
+            <Select value={form.stage} onValueChange={val => setForm({ ...form, stage: val })}>
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Seleccioná la etapa" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NUEVO">Nuevo</SelectItem>
+                <SelectItem value="VISITA">Visita</SelectItem>
+                <SelectItem value="NEGOCIACION">Negociación</SelectItem>
               </SelectContent>
             </Select>
           </div>

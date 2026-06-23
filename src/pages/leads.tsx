@@ -12,8 +12,15 @@ import {
   LeadDetailModal,
   useLeads,
 } from '@/features/leads'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 
-const STAGE_FILTERS = ['Nuevo', 'Contactado', 'Visita', 'Negociacion', 'Cierre'] as const
+const STAGE_FILTERS = ['NUEVO', 'CONTACTADO', 'VISITA', 'NEGOCIACION', 'CIERRE'] as const
 
 export function LeadsPage() {
   const logic = useLeads()
@@ -76,7 +83,7 @@ export function LeadsPage() {
                     onClick={() => logic.setStageFilter(prev =>
                       prev.includes(stage) ? prev.filter(s => s !== stage) : [...prev, stage]
                     )}
-                    className={cn(logic.stageFilter.includes(stage) && 'bg-primary text-primary-foreground')}
+                    className={cn(logic.stageFilter.includes(stage) && 'bg-primary text-white font-bold')}
                   >
                     {stage}
                   </Button>
@@ -94,7 +101,7 @@ export function LeadsPage() {
                 onEdit={logic.openEditModal}
                 onConvert={logic.openConvertModal}
                 onDiscard={(id) => { logic.setDiscardingLead(id); logic.setDiscardForm({ reason: 'precio', notes: '' }) }}
-                onDelete={logic.handleDeleteLead}
+                onDelete={logic.confirmDelete}
               />
             )}
           </CardContent>
@@ -114,7 +121,7 @@ export function LeadsPage() {
               leads={logic.discardedLeads}
               getAgentName={logic.getAgentName}
               onReactivate={logic.handleReactivate}
-              onDelete={logic.handleDeleteLead}
+              onDelete={logic.confirmDelete}
             />
           </CardContent>
         </Card>
@@ -152,6 +159,21 @@ export function LeadsPage() {
         setPaymentForm={logic.setPaymentForm}
         onSavePayment={logic.handleSavePayment}
       />
+
+      <Dialog open={!!logic.deletingLead} onOpenChange={(open) => !open && logic.setDeletingLead(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Eliminar Lead</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 text-sm text-neutral-600">
+            ¿Estás seguro de que deseas eliminar este lead? Esta acción no se puede deshacer y eliminará todos los negocios asociados de forma permanente.
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => logic.setDeletingLead(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={logic.handleDeleteLead}>Eliminar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

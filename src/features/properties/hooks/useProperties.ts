@@ -28,10 +28,12 @@ export function useProperties() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [formData, setFormData] = useState<PropertyFormData>(PROPERTY_FORM_DEFAULT)
 
+  const propertiesFetched = useStore(state => state.propertiesFetched)
+
   // Carga inicial desde el backend al montar el módulo
   useEffect(() => {
-    fetchProperties()
-  }, [fetchProperties])
+    if (!propertiesFetched) fetchProperties()
+  }, [fetchProperties, propertiesFetched])
 
   const filteredProperties = useMemo(() =>
     properties.filter(p => {

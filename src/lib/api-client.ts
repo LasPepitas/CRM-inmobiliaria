@@ -47,6 +47,8 @@ export const apiClient = {
     instance.post(endpoint, body, config) as Promise<T>,
   patch: <T>(endpoint: string, body?: unknown, config?: import('axios').AxiosRequestConfig) =>
     instance.patch(endpoint, body, config) as Promise<T>,
+  put: <T>(endpoint: string, body?: unknown, config?: import('axios').AxiosRequestConfig) =>
+    instance.put(endpoint, body, config) as Promise<T>,
   delete: <T>(endpoint: string) =>
     instance.delete(endpoint) as Promise<T>,
 }

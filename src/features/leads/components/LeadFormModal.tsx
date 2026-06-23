@@ -8,7 +8,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { sourceOptions } from '../constants'
+import { sourceOptions, stageOptions } from '../constants'
 import type { Lead, LeadSource } from '../types'
 import { useAgents } from '@/features/equipo'
 
@@ -105,6 +105,21 @@ export function LeadFormModal({ open, onClose, form, setForm, isEditing, onSave 
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">Etapa</label>
+              <Select value={form.stage} onValueChange={(val: Lead['stage']) => setForm({ ...form, stage: val })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Etapa" />
+                </SelectTrigger>
+                <SelectContent>
+                  {stageOptions.map(stg => (
+                    <SelectItem key={stg} value={stg}>{stg}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <label className="text-sm font-medium">Score (0-100)</label>
               <Input

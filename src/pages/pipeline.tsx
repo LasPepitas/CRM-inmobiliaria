@@ -1,15 +1,24 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, LayoutGrid, List, SlidersHorizontal } from 'lucide-react'
+import { Search, LayoutGrid, List, SlidersHorizontal, AlertCircle, Loader2 } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { STAGES } from '@/features/pipeline/constants'
 import { KanbanBoard, DealsTable, DealDetailModal, usePipeline } from '@/features/pipeline'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 
 export function PipelinePage() {
   const {
     deals,
+    isLoading,
+    error,
     filteredDeals,
     leads,
     agents,
@@ -20,17 +29,22 @@ export function PipelinePage() {
     stageFilter,
     noteText,
     activeFiltersCount,
+    deletingDealId,
     setView,
     setSearch,
     setAgentFilter,
     setStageFilter,
     setNoteText,
     setSelectedDealId,
+    setDeletingDealId,
     getLeadName,
     getLeadAgent,
     handleMoveDeal,
     handleAddNote,
+    handleDeleteDeal,
+    confirmDeleteDeal,
     clearFilters,
+    fetchDeals,
   } = usePipeline()
 
   const selectedLead = leads.find(l => l.id === selectedDeal?.lead_id)
@@ -42,7 +56,16 @@ export function PipelinePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight font-heading">Pipeline</h1>
-          <p className="text-neutral-600 mt-1">Seguimiento de negocios en proceso</p>
+          <p className="text-neutral-600 mt-1">
+            {isLoading ? (
+              <span className="flex items-center gap-1.5">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                Cargando negocios...
+              </span>
+            ) : (
+              `Seguimiento de negocios en proceso`
+            )}
+          </p>
         </div>
         {/* View toggle */}
         <div className="flex items-center gap-1 bg-neutral-100 rounded-lg p-1">
@@ -70,6 +93,22 @@ export function PipelinePage() {
           </button>
         </div>
       </div>
+
+      {/* Error banner */}
+      {error && (
+        <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span className="flex-1">Error al cargar pipeline: {error}</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchDeals()}
+            className="border-red-300 text-red-700 hover:bg-red-100"
+          >
+            Reintentar
+          </Button>
+        </div>
+      )}
 
       {/* Filters bar */}
       <Card>
@@ -164,7 +203,24 @@ export function PipelinePage() {
         onNoteChange={setNoteText}
         onAddNote={handleAddNote}
         onMoveDeal={handleMoveDeal}
+        onCancelDeal={(id) => handleMoveDeal(id, 'Cancelado')}
+        onDeleteDeal={confirmDeleteDeal}
       />
+
+      <Dialog open={!!deletingDealId} onOpenChange={(open) => !open && setDeletingDealId(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Eliminar Negocio</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 text-sm text-neutral-600">
+            ¿Estás seguro de que deseas eliminar este negocio? Esta acción no se puede deshacer.
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeletingDealId(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={() => handleDeleteDeal(deletingDealId!)}>Eliminar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

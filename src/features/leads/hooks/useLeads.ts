@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useStore } from '@/store'
 import type { Lead } from '@/features/leads/types'
 import { useLeadsData } from './useLeadsData'
+import { LeadsService } from '../services/LeadsService'
 
 export function useLeads() {
   const {
@@ -12,21 +13,20 @@ export function useLeads() {
     updateLeadPayment,
     discardLead,
     reactivateLead,
-    addToast,
-    addDeal,
-    properties
+    addToast
   } = useStore()
 
   const [search, setSearch] = useState('')
   const [stageFilter, setStageFilter] = useState<string[]>([])
 
-  const { activeLeads, discardedLeads, filteredLeads, loadingLeads } = useLeadsData(search, stageFilter)
+  const { activeLeads, discardedLeads, filteredLeads, loadingLeads, refresh } = useLeadsData(search, stageFilter)
 
   const [showNewLeadModal, setShowNewLeadModal] = useState(false)
   const [editingLead, setEditingLead] = useState<string | null>(null)
   const [selectedLead, setSelectedLead] = useState<string | null>(null)
   const [convertingLead, setConvertingLead] = useState<string | null>(null)
   const [discardingLead, setDiscardingLead] = useState<string | null>(null)
+  const [deletingLead, setDeletingLead] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'activos' | 'descartados'>('activos')
 
   const [discardForm, setDiscardForm] = useState({ reason: 'precio', notes: '' })
@@ -35,6 +35,7 @@ export function useLeads() {
     value: 0,
     probability: 30,
     expected_close: '',
+    stage: 'NUEVO'
   })
   const [paymentForm, setPaymentForm] = useState({
     type: 'contado' as 'contado' | 'cuotas' | 'hipoteca',
@@ -53,7 +54,7 @@ export function useLeads() {
     budget: 0,
     notes: '',
     assigned_agent: '1',
-    stage: 'Nuevo',
+    stage: 'NUEVO',
     score: 50,
   })
 
@@ -80,21 +81,26 @@ export function useLeads() {
         addToast({ title: 'Lead creado', description: `${newLead.firstName} ${newLead.lastName} fue agregado`, variant: 'success' })
       }
       setShowNewLeadModal(false)
-      setNewLead({ firstName: '', lastName: '', email: '', phone: '', source: 'Web', budget: 0, notes: '', assigned_agent: '1', stage: 'Nuevo', score: 50 })
+      setNewLead({ firstName: '', lastName: '', email: '', phone: '', source: 'Web', budget: 0, notes: '', assigned_agent: '1', stage: 'NUEVO', score: 50 })
     } catch {
       addToast({ title: 'Error', description: 'Hubo un problema al guardar el lead', variant: 'error' })
     }
   }
 
-  const handleDeleteLead = async (id: string) => {
-    if (confirm('¿Estás seguro de eliminar este lead?')) {
-      const lead = filteredLeads.find(l => l.id === id) || discardedLeads.find(l => l.id === id)
-      try {
-        await deleteLead(id)
-        addToast({ title: 'Lead eliminado', description: `${lead?.firstName} ${lead?.lastName} fue eliminado`, variant: 'success' })
-      } catch {
-        addToast({ title: 'Error', description: 'Hubo un problema al eliminar el lead', variant: 'error' })
-      }
+  const confirmDelete = (id: string) => {
+    setDeletingLead(id)
+  }
+
+  const handleDeleteLead = async () => {
+    if (!deletingLead) return
+    const id = deletingLead
+    const lead = filteredLeads.find(l => l.id === id) || discardedLeads.find(l => l.id === id)
+    try {
+      await deleteLead(id)
+      addToast({ title: 'Lead eliminado', description: `${lead?.firstName} ${lead?.lastName} fue eliminado`, variant: 'success' })
+      setDeletingLead(null)
+    } catch {
+      addToast({ title: 'Error', description: 'Hubo un problema al eliminar el lead', variant: 'error' })
     }
   }
 
@@ -110,22 +116,20 @@ export function useLeads() {
       addToast({ title: 'Error', description: 'Ingresá una fecha de cierre estimada', variant: 'error' })
       return
     }
-    const property = properties.find(p => p.id === convertForm.property_id)
     try {
-      addDeal({
+      await LeadsService.convertToDeal(convertingLead, {
         property_id: convertForm.property_id,
-        lead_id: convertingLead,
-        stage: 'Nuevo',
         value: convertForm.value,
         probability: convertForm.probability,
         expected_close: convertForm.expected_close,
-        last_update: new Date().toISOString().split('T')[0],
-        title: `${property?.title || 'Propiedad'} - ${lead.firstName} ${lead.lastName}`,
+        stage: convertForm.stage,
       })
       addToast({ title: '¡Negocio creado!', description: `${lead.firstName} ${lead.lastName} ahora está en el pipeline`, variant: 'success' })
       setConvertingLead(null)
-    } catch {
-      addToast({ title: 'Error', description: 'Hubo un problema al convertir el lead', variant: 'error' })
+      if (refresh) refresh()
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } }
+      addToast({ title: 'Error al convertir', description: error.response?.data?.message || 'Hubo un problema al convertir el lead', variant: 'error' })
     }
   }
 
@@ -171,12 +175,12 @@ export function useLeads() {
 
   const openConvertModal = (leadId: string) => {
     const lead = activeLeads.find(l => l.id === leadId)
-    setConvertForm({ property_id: '', value: lead?.budget || 0, probability: 30, expected_close: '' })
+    setConvertForm({ property_id: '', value: lead?.budget || 0, probability: 30, expected_close: '', stage: 'NUEVO' })
     setConvertingLead(leadId)
   }
 
   const resetNewLeadForm = () => {
-    setNewLead({ firstName: '', lastName: '', email: '', phone: '', source: 'Web', budget: 0, notes: '', assigned_agent: '1', stage: 'Nuevo', score: 50 })
+    setNewLead({ firstName: '', lastName: '', email: '', phone: '', source: 'Web', budget: 0, notes: '', assigned_agent: '1', stage: 'NUEVO', score: 50 })
   }
 
   return {
@@ -188,13 +192,14 @@ export function useLeads() {
     selectedLead, setSelectedLead,
     convertingLead, setConvertingLead,
     discardingLead, setDiscardingLead,
+    deletingLead, setDeletingLead,
     activeTab, setActiveTab,
     discardForm, setDiscardForm,
     convertForm, setConvertForm,
     paymentForm, setPaymentForm,
     newLead, setNewLead,
     getAgentName,
-    handleSaveLead, handleDeleteLead, handleConvertToDeal,
+    handleSaveLead, handleDeleteLead, confirmDelete, handleConvertToDeal,
     handleDiscard, handleReactivate, handleSavePayment,
     openEditModal, openConvertModal,
     resetNewLeadForm,

@@ -20,6 +20,7 @@ export const stageBadgeVariant: Record<DealStage, 'default' | 'success' | 'warni
   Visita: 'warning',
   Negociacion: 'neutral',
   Cierre: 'success',
+  Cancelado: 'error',
 }
 
 export function probabilityVariant(prob: number): 'success' | 'warning' | 'error' {

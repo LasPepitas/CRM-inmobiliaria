@@ -3,7 +3,7 @@ import type { Lead } from '@/features/leads/types'
 import type { Agent } from '@/store/slices/agentsSlice'
 import type { DealStage } from '../types'
 import { STAGES } from '../constants'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Send, MessageSquare, User, Phone, Mail } from 'lucide-react'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import { probabilityVariant } from '../constants'
+
+import { Trash2 } from 'lucide-react'
 
 interface DealDetailModalProps {
   deal: Deal | undefined
@@ -22,6 +24,8 @@ interface DealDetailModalProps {
   onNoteChange: (text: string) => void
   onAddNote: () => void
   onMoveDeal: (dealId: string, stage: DealStage) => void
+  onDeleteDeal?: (id: string) => void
+  onCancelDeal?: (id: string) => void
 }
 
 export function DealDetailModal({
@@ -34,13 +38,14 @@ export function DealDetailModal({
   onNoteChange,
   onAddNote,
   onMoveDeal,
+  onDeleteDeal,
 }: DealDetailModalProps) {
   if (!deal) return null
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
-        <DialogHeader className="px-6 py-4 border-b border-outline-variant/30 shrink-0">
+        <DialogHeader className="px-6 py-4 border-b border-outline-variant/30 shrink-0 flex flex-row items-center justify-between">
           <DialogTitle className="text-xl">{deal.title}</DialogTitle>
         </DialogHeader>
 
@@ -80,18 +85,18 @@ export function DealDetailModal({
                   Detalles del Negocio
                 </h4>
                 <div className="space-y-2 text-sm">
-                  <p className="flex justify-between">
+                  <div className="flex justify-between">
                     <span className="text-neutral-500">Valor:</span>
                     <span className="font-bold text-base">{formatCurrency(deal.value)}</span>
-                  </p>
-                  <p className="flex justify-between items-center">
+                  </div>
+                  <div className="flex justify-between items-center">
                     <span className="text-neutral-500">Probabilidad:</span>
                     <Badge variant={probabilityVariant(deal.probability)}>{deal.probability}%</Badge>
-                  </p>
-                  <p className="flex justify-between">
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-neutral-500">Cierre est.:</span>
                     <span className="font-medium">{formatDate(deal.expected_close)}</span>
-                  </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -168,6 +173,14 @@ export function DealDetailModal({
             </div>
           </div>
         </div>
+
+        <DialogFooter className="px-6 pb-4 border-t border-neutral-100 shrink-0">
+          <div className="flex gap-2 justify-end w-full">
+            <Button variant="destructive" size="sm" onClick={() => onDeleteDeal?.(deal.id)}>
+              <Trash2 className="h-4 w-4 mr-2" /> Eliminar
+            </Button>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

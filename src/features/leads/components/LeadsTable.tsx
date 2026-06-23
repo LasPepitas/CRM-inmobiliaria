@@ -45,7 +45,14 @@ export function LeadsTable({ leads, getAgentName, onViewDetail, onEdit, onConver
                   {getInitials(lead.firstName + ' ' + lead.lastName)}
                 </div>
                 <div>
-                  <p className="font-medium">{lead.firstName} {lead.lastName}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">{lead.firstName} {lead.lastName}</p>
+                    {lead.status === 'Convertido' && (
+                      <Badge variant="success" className="text-[10px] py-0.5 px-1.5 uppercase tracking-wider font-heading">
+                        Convertido
+                      </Badge>
+                    )}
+                  </div>
                   <div className="flex items-center gap-3 text-xs text-neutral-500 mt-0.5">
                     <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{lead.email}</span>
                   </div>
@@ -77,10 +84,16 @@ export function LeadsTable({ leads, getAgentName, onViewDetail, onEdit, onConver
                   <DropdownMenuItem onClick={() => onViewDetail(lead.id)}><Eye className="h-4 w-4 mr-2" />Ver Detalle</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onEdit(lead.id)}><Edit className="h-4 w-4 mr-2" />Editar</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => onConvert(lead.id)}><ArrowRightLeft className="h-4 w-4 mr-2" />Convertir a Negocio</DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => onConvert(lead.id)}
+                  >
+                    <ArrowRightLeft className="h-4 w-4 mr-2" />
+                    Convertir a Negocio
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => onDiscard(lead.id)}
-                    className="text-warning-600"
+                    className={cn(lead.status === 'Convertido' ? 'text-neutral-400' : 'text-warning-600')}
+                    disabled={lead.status === 'Convertido'}
                   >
                     <XCircle className="h-4 w-4 mr-2" />Marcar No Interesado
                   </DropdownMenuItem>
