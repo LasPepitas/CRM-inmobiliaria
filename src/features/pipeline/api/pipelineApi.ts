@@ -53,7 +53,7 @@ const STAGE_TO_FRONTEND: Record<string, DealStage> = {
   VISITA: 'Visita',
   NEGOCIACION: 'Negociacion',
   CIERRE: 'Cierre',
-  CANCELADO: 'Cancelado' as DealStage
+  CANCELADO: 'Cancelado'
 }
 
 const STAGE_TO_BACKEND: Record<string, string> = {

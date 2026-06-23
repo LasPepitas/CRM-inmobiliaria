@@ -8,8 +8,10 @@ import {
   DeletePropertyDialog,
   useProperties,
 } from '@/features/properties'
+import { useNavigate } from 'react-router-dom'
 
 export function PropertiesPage() {
+  const navigate = useNavigate()
   const {
     properties,
     propertiesLoading,
@@ -30,7 +32,6 @@ export function PropertiesPage() {
     setEditingPropertyId,
     openModal,
     closeModal,
-    setActivePage,
     toggleTypeFilter,
     toggleStatusFilter,
     handleSaveNew,
@@ -108,8 +109,8 @@ export function PropertiesPage() {
         property={selectedProperty}
         open={!!selectedProperty}
         onClose={() => setSelectedPropertyId(null)}
-        onGoToLeads={() => { setActivePage('leads'); setSelectedPropertyId(null) }}
-        onGoToVisits={() => { setActivePage('visitas'); setSelectedPropertyId(null) }}
+        onGoToLeads={() => { navigate('/dashboard/leads'); setSelectedPropertyId(null) }}
+        onGoToVisits={() => { navigate('/dashboard/visitas'); setSelectedPropertyId(null) }}
       />
 
       <PropertyFormModal

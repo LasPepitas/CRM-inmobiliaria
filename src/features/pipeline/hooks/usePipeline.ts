@@ -26,9 +26,10 @@ export function usePipeline() {
     try {
       const data = await pipelineApi.getAll()
       setDeals(data.map(toFrontendDeal))
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching pipeline deals:', err)
-      setError(err.response?.data?.message || 'Error al cargar los negocios del pipeline')
+      const error = err as { response?: { data?: { message?: string } } }
+      setError(error.response?.data?.message || 'Error al cargar los negocios del pipeline')
       addToast({ title: 'Error', description: 'No se pudieron cargar los negocios', variant: 'error' })
     } finally {
       setIsLoading(false)
@@ -36,7 +37,9 @@ export function usePipeline() {
   }, [addToast])
 
   useEffect(() => {
-    fetchDeals()
+    Promise.resolve().then(() => {
+      fetchDeals()
+    })
   }, [fetchDeals])
 
   const getLeadName = useCallback((leadId: string) => {
@@ -80,10 +83,11 @@ export function usePipeline() {
       setDeals(prev => prev.map(d => d.id === dealId ? { ...d, stage: newStage } : d))
       await pipelineApi.updateStage(dealId, newStage)
       addToast({ title: 'Negocio movido', description: `Movido a ${newStage}`, variant: 'success' })
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Revert on error by refetching
       fetchDeals()
-      addToast({ title: 'Error al mover negocio', description: err.response?.data?.message || 'Revisa tu conexión', variant: 'error' })
+      const error = err as { response?: { data?: { message?: string } } }
+      addToast({ title: 'Error al mover negocio', description: error.response?.data?.message || 'Revisa tu conexión', variant: 'error' })
     }
   }
 
@@ -107,8 +111,9 @@ export function usePipeline() {
       
       setNoteText('')
       addToast({ title: 'Nota agregada', variant: 'success' })
-    } catch (err: any) {
-      addToast({ title: 'Error al agregar nota', description: err.response?.data?.message || 'Inténtalo de nuevo', variant: 'error' })
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } }
+      addToast({ title: 'Error al agregar nota', description: error.response?.data?.message || 'Inténtalo de nuevo', variant: 'error' })
     }
   }
 
@@ -123,8 +128,9 @@ export function usePipeline() {
       addToast({ title: 'Negocio eliminado', variant: 'success' })
       setSelectedDealId(null)
       setDeletingDealId(null)
-    } catch (err: any) {
-      addToast({ title: 'Error al eliminar', description: err.response?.data?.message || 'Inténtalo de nuevo', variant: 'error' })
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } }
+      addToast({ title: 'Error al eliminar', description: error.response?.data?.message || 'Inténtalo de nuevo', variant: 'error' })
     }
   }
 

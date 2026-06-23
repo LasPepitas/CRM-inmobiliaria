@@ -18,7 +18,6 @@ export function useProperties() {
     openModal,
     closeModal,
     ui,
-    setActivePage,
   } = useStore()
 
   const [search, setSearch] = useState('')
@@ -202,7 +201,6 @@ export function useProperties() {
     fetchProperties,
     openModal,
     closeModal,
-    setActivePage,
     toggleTypeFilter,
     toggleStatusFilter,
     handleSaveNew,

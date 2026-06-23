@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useStore } from '@/store'
 import type { Lead } from '@/features/leads/types'
 import { useLeadsData } from './useLeadsData'
-import { leadsApi } from '../api/leadsApi'
+import { LeadsService } from '../services/LeadsService'
 
 export function useLeads() {
   const {
@@ -117,7 +117,7 @@ export function useLeads() {
       return
     }
     try {
-      await leadsApi.convertToDeal(convertingLead, {
+      await LeadsService.convertToDeal(convertingLead, {
         property_id: convertForm.property_id,
         value: convertForm.value,
         probability: convertForm.probability,
@@ -127,8 +127,9 @@ export function useLeads() {
       addToast({ title: '¡Negocio creado!', description: `${lead.firstName} ${lead.lastName} ahora está en el pipeline`, variant: 'success' })
       setConvertingLead(null)
       if (refresh) refresh()
-    } catch (err: any) {
-      addToast({ title: 'Error al convertir', description: err.response?.data?.message || 'Hubo un problema al convertir el lead', variant: 'error' })
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } }
+      addToast({ title: 'Error al convertir', description: error.response?.data?.message || 'Hubo un problema al convertir el lead', variant: 'error' })
     }
   }
 

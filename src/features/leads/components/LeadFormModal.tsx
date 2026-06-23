@@ -1,4 +1,3 @@
-import { useStore } from '@/store'
 import {
   Dialog,
   DialogContent,
@@ -11,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { sourceOptions, stageOptions } from '../constants'
 import type { Lead, LeadSource } from '../types'
+import { useAgents } from '@/features/equipo'
 
 interface LeadFormModalProps {
   open: boolean
@@ -22,7 +22,7 @@ interface LeadFormModalProps {
 }
 
 export function LeadFormModal({ open, onClose, form, setForm, isEditing, onSave }: LeadFormModalProps) {
-  const agents = useStore((state) => state.agents)
+  const { agents } = useAgents()
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>

@@ -203,7 +203,7 @@ export function PipelinePage() {
         onNoteChange={setNoteText}
         onAddNote={handleAddNote}
         onMoveDeal={handleMoveDeal}
-        onCancelDeal={(id) => handleMoveDeal(id, 'Cancelado' as any)}
+        onCancelDeal={(id) => handleMoveDeal(id, 'Cancelado')}
         onDeleteDeal={confirmDeleteDeal}
       />
 
