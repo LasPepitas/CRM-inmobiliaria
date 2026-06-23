@@ -54,6 +54,7 @@ export interface ConvertLeadPayload {
   value: number
   probability: number
   expected_close: string
+  stage?: string
 }
 
 export interface ApiResponse<T> {

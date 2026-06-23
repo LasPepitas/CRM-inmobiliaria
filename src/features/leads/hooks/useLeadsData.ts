@@ -5,14 +5,14 @@ export function useLeadsData(search: string, stageFilter: string[]) {
   const leads = useStore((state) => state.leads)
   const loadingLeads = useStore((state) => state.loadingLeads)
   const leadsFetched = useStore((state) => state.leadsFetched)
-  const agentsFetched = useStore((state) => state.agentsFetched)
+  const hasFetchedAgents = useStore((state) => state.hasFetchedAgents)
   const fetchLeads = useStore((state) => state.fetchLeads)
   const fetchAgents = useStore((state) => state.fetchAgents)
   
   useEffect(() => {
     if (!leadsFetched) fetchLeads()
-    if (!agentsFetched) fetchAgents()
-  }, [fetchLeads, fetchAgents, leadsFetched, agentsFetched])
+    if (!hasFetchedAgents) fetchAgents()
+  }, [fetchLeads, fetchAgents, leadsFetched, hasFetchedAgents])
   
   
   const activeLeads = useMemo(() => {

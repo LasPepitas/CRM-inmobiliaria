@@ -9,7 +9,7 @@ export class LeadsService {
     if (stage && stage.length > 0) params.stage = stage.join(',')
     if (search) params.search = search
 
-    const response = await apiClient.get<LeadApiResponse[]>('/leads', { params })
+    const response = await apiClient.get<LeadApiResponse[]>('/leads', params)
     return (response || []).map(adaptExternalLead)
   }
 
