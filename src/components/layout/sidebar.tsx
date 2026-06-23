@@ -19,25 +19,27 @@ import {
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useAuth } from '@/features/auth'
+import { Link, useLocation } from 'react-router-dom'
 
 const navItems = [
-  { id: 'overview', label: 'Resumen', icon: LayoutDashboard },
-  { id: 'propiedades', label: 'Propiedades', icon: Building2 },
-  { id: 'leads', label: 'Leads', icon: Users },
-  { id: 'pipeline', label: 'Pipeline', icon: Kanban },
-  { id: 'visitas', label: 'Visitas', icon: CalendarDays },
-  { id: 'tareas', label: 'Tareas', icon: CheckSquare },
-  { id: 'reportes', label: 'Reportes', icon: BarChart3 },
-  { id: 'documentos', label: 'Documentos', icon: FileText },
-  { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
-  { id: 'integracion', label: 'Integración', icon: Plug },
-  { id: 'equipo', label: 'Equipo', icon: UsersRound },
-  { id: 'ajustes', label: 'Ajustes', icon: Settings },
+  { id: 'overview', label: 'Resumen', icon: LayoutDashboard, path: '/dashboard' },
+  { id: 'propiedades', label: 'Propiedades', icon: Building2, path: '/dashboard/propiedades' },
+  { id: 'leads', label: 'Leads', icon: Users, path: '/dashboard/leads' },
+  { id: 'pipeline', label: 'Pipeline', icon: Kanban, path: '/dashboard/pipeline' },
+  { id: 'visitas', label: 'Visitas', icon: CalendarDays, path: '/dashboard/visitas' },
+  { id: 'tareas', label: 'Tareas', icon: CheckSquare, path: '/dashboard/tareas' },
+  { id: 'reportes', label: 'Reportes', icon: BarChart3, path: '/dashboard/reportes' },
+  { id: 'documentos', label: 'Documentos', icon: FileText, path: '/dashboard/documents' },
+  { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, path: '/dashboard/whatsapp' },
+  { id: 'integracion', label: 'Integración', icon: Plug, path: '/dashboard/integracion' },
+  { id: 'equipo', label: 'Equipo', icon: UsersRound, path: '/dashboard/equipo' },
+  { id: 'ajustes', label: 'Ajustes', icon: Settings, path: '/dashboard/ajustes' },
 ]
 
 export function Sidebar() {
-  const { ui, toggleSidebar, setActivePage } = useStore()
+  const { ui, toggleSidebar } = useStore()
   const { hasRoutePermission } = useAuth()
+  const location = useLocation()
   const collapsed = ui.sidebarCollapsed
 
   const visibleItems = navItems.filter((item) => hasRoutePermission(item.id))
@@ -58,11 +60,11 @@ export function Sidebar() {
           <nav className="space-y-1 px-2">
             {visibleItems.map((item) => {
               const Icon = item.icon
-              const isActive = ui.activePage === item.id
+              const isActive = location.pathname === item.path
               return (
-                <button
+                <Link
                   key={item.id}
-                  onClick={() => setActivePage(item.id)}
+                  to={item.path}
                   className={cn(
                     "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-150",
                     isActive
@@ -73,7 +75,7 @@ export function Sidebar() {
                 >
                   <Icon className="h-5 w-5 shrink-0" />
                   {!collapsed && <span>{item.label}</span>}
-                </button>
+                </Link>
               )
             })}
           </nav>

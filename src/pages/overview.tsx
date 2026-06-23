@@ -17,6 +17,7 @@ import {
   Clock,
 } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useNavigate } from 'react-router-dom'
 
 interface KPICardProps {
   label: string
@@ -66,7 +67,8 @@ const stages = [
 ]
 
 export function OverviewPage() {
-  const { properties, leads, deals, agents, visits, tasks, documents, setActivePage } = useStore()
+  const { properties, leads, deals, agents, visits, tasks, documents } = useStore()
+  const navigate = useNavigate()
 
   const totalRevenue = agents.reduce((sum, a) => sum + a.revenue, 0)
   const activeDeals = deals.filter(d => d.stage !== 'Cierre').length
@@ -96,11 +98,11 @@ export function OverviewPage() {
           <p className="text-neutral-600 mt-1">Resumen de tu actividad inmobiliaria</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setActivePage('leads')}>
+          <Button variant="outline" onClick={() => navigate('/dashboard/leads')}>
             <Users className="h-4 w-4 mr-2" />
             Ver Leads
           </Button>
-          <Button onClick={() => setActivePage('pipeline')}>
+          <Button onClick={() => navigate('/dashboard/pipeline')}>
             <TrendingUp className="h-4 w-4 mr-2" />
             Ver Pipeline
           </Button>
@@ -109,12 +111,12 @@ export function OverviewPage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
-        <KPICard label="Propiedades" value={properties.length} icon={Building2} onClick={() => setActivePage('propiedades')} />
-        <KPICard label="Leads" value={leads.length} delta={8} icon={Users} onClick={() => setActivePage('leads')} />
-        <KPICard label="Negocios" value={activeDeals} icon={TrendingUp} onClick={() => setActivePage('pipeline')} />
+        <KPICard label="Propiedades" value={properties.length} icon={Building2} onClick={() => navigate('/dashboard/propiedades')} />
+        <KPICard label="Leads" value={leads.length} delta={8} icon={Users} onClick={() => navigate('/dashboard/leads')} />
+        <KPICard label="Negocios" value={activeDeals} icon={TrendingUp} onClick={() => navigate('/dashboard/pipeline')} />
         <KPICard label="Ingresos" value={totalRevenue} delta={15} icon={DollarSign} color="bg-secondary/10" />
-        <KPICard label="Tareas" value={pendingTasks} icon={CheckSquare} color="bg-warning-500/10" onClick={() => setActivePage('tareas')} />
-        <KPICard label="Visitas Hoy" value={todayVisits} icon={Calendar} color="bg-success-500/10" onClick={() => setActivePage('visitas')} />
+        <KPICard label="Tareas" value={pendingTasks} icon={CheckSquare} color="bg-warning-500/10" onClick={() => navigate('/dashboard/tareas')} />
+        <KPICard label="Visitas Hoy" value={todayVisits} icon={Calendar} color="bg-success-500/10" onClick={() => navigate('/dashboard/visitas')} />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -123,24 +125,25 @@ export function OverviewPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Pipeline de Negocios</h2>
-              <Button variant="ghost" size="sm" onClick={() => setActivePage('pipeline')}>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/pipeline')}>
                 <Eye className="h-4 w-4 mr-2" />
                 Ver Todo
               </Button>
             </div>
             <div className="space-y-4">
-              {dealsByStage.map((stage) => {
+              {stages.map((stage) => {
+                const count = deals.filter(d => d.stage === stage.name).length
                 const maxCount = Math.max(...dealsByStage.map(s => s.count), 1)
                 return (
                   <div key={stage.name} className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-medium">{stage.name}</span>
-                      <Badge variant="neutral">{stage.count}</Badge>
+                      <Badge variant="neutral">{count}</Badge>
                     </div>
                     <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
                       <div
-                        className={cn("h-full rounded-full transition-all duration-500", stage.color)}
-                        style={{ width: `${(stage.count / maxCount) * 100}%` }}
+                         className={cn("h-full rounded-full transition-all duration-500", stage.color)}
+                         style={{ width: `${(count / maxCount) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -186,7 +189,7 @@ export function OverviewPage() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Propiedades con Más Interés</h2>
-            <Button variant="ghost" size="sm" onClick={() => setActivePage('propiedades')}>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/propiedades')}>
               <Eye className="h-4 w-4 mr-2" />
               Ver Todo
             </Button>
@@ -204,7 +207,7 @@ export function OverviewPage() {
             </TableHeader>
             <TableBody>
               {topProperties.map((property) => (
-                <TableRow key={property.id} className="cursor-pointer" onClick={() => setActivePage('propiedades')}>
+                <TableRow key={property.id} className="cursor-pointer" onClick={() => navigate('/dashboard/propiedades')}>
                   <TableCell className="font-medium">{property.title}</TableCell>
                   <TableCell>{property.type}</TableCell>
                   <TableCell>{formatCurrency(property.price)}</TableCell>

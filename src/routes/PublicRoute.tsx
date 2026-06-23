@@ -1,13 +1,8 @@
-import { useEffect } from 'react'
+import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/features/auth'
-import { AppRoutes } from './routes/routesConfig'
 
-function App() {
-  const { checkSession, isLoading } = useAuth()
-
-  useEffect(() => {
-    checkSession()
-  }, [checkSession])
+export function PublicRoute() {
+  const { isAuthenticated, isLoading } = useAuth()
 
   if (isLoading) {
     return (
@@ -20,7 +15,9 @@ function App() {
     )
   }
 
-  return <AppRoutes />
-}
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />
+  }
 
-export default App
+  return <Outlet />
+}
