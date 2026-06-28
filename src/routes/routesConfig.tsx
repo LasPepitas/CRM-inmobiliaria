@@ -16,7 +16,6 @@ import {
   AjustesPage,
   WhatsAppPage,
   LoginPage,
-  LandingPage,
 } from '@/pages'
 
 function DashboardLayout() {
@@ -30,9 +29,8 @@ function DashboardLayout() {
 export function AppRoutes() {
   return (
     <Routes>
-      {/* Rutas Públicas Libres */}
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/landing" element={<Navigate to="/" replace />} />
+      {/* Redirección raíz a Dashboard */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
       {/* Rutas Públicas Restringidas (Login) */}
       <Route element={<PublicRoute />}>

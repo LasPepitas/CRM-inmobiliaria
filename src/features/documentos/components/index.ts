@@ -1,1 +1,5 @@
 export { ContractWizard } from './wizard/ContractWizard'
+export { DocumentosFilters } from './DocumentosFilters'
+export { DocumentosTable } from './DocumentosTable'
+export { NewDocumentModal } from './NewDocumentModal'
+export { EditDocumentModal } from './EditDocumentModal'

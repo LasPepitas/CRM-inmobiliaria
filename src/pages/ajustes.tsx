@@ -6,17 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
-import {
-  Palette,
-  Save,
-  Shield,
-  Edit,
-  Trash2,
-  Plus,
-  CheckCircle,
-  Sun,
-  Moon,
-} from 'lucide-react'
+import { Save, Shield, CheckCircle, Sun, Moon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const roles = [
@@ -48,14 +38,6 @@ const roles = [
     color: 'neutral',
     permissions: ['leads_view', 'deals_view', 'reports_view'],
   },
-]
-
-const teamMembers = [
-  { id: '1', name: 'Roberto García', email: 'roberto.garcia@siena.com', role: 'Administrador', active: true },
-  { id: '2', name: 'María López', email: 'maria.lopez@siena.com', role: 'Gerente', active: true },
-  { id: '3', name: 'Carlos Pérez', email: 'carlos.perez@siena.com', role: 'Asesor', active: true },
-  { id: '4', name: 'Ana Martínez', email: 'ana.martinez@siena.com', role: 'Asesor', active: true },
-  { id: '5', name: 'Diego Fernández', email: 'diego.fernandez@siena.com', role: 'Asesor', active: false },
 ]
 
 const defaultPermissions = {
@@ -101,45 +83,6 @@ function RoleItem({ role }: { role: typeof roles[0] }) {
   )
 }
 
-function TeamMemberItem({ member }: { member: typeof teamMembers[0] }) {
-  const [role, setRole] = useState(member.role)
-  const [active, setActive] = useState(member.active)
-  return (
-    <div className="flex items-center gap-4 p-4 border rounded-lg">
-      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center font-medium text-primary">
-        {member.name.split(' ').map(n => n[0]).join('')}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium">{member.name}</p>
-        <p className="text-sm text-neutral-500">{member.email}</p>
-      </div>
-      <select
-        value={role}
-        onChange={(e) => setRole(e.target.value)}
-        className="h-9 rounded-md border border-outline-variant bg-surface-container-lowest px-3 py-1 text-sm"
-      >
-        <option>Administrador</option>
-        <option>Gerente</option>
-        <option>Asesor</option>
-        <option>Solo Lectura</option>
-      </select>
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-neutral-500">{active ? 'Activo' : 'Inactivo'}</span>
-        <button
-          onClick={() => setActive(!active)}
-          className={cn("relative inline-flex h-6 w-11 items-center rounded-full transition-colors", active ? "bg-success-500" : "bg-neutral-200")}
-        >
-          <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white transition-transform", active ? "translate-x-6" : "translate-x-1")} />
-        </button>
-      </div>
-      <div className="flex gap-1">
-        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-        <Button variant="ghost" size="icon" className="text-error-500"><Trash2 className="h-4 w-4" /></Button>
-      </div>
-    </div>
-  )
-}
-
 export function AjustesPage() {
   const { addToast, ui, toggleDarkMode } = useStore()
   const [activeTab, setActiveTab] = useState('profile')
@@ -171,20 +114,12 @@ export function AjustesPage() {
     addToast({ title: 'Perfil actualizado', description: 'Tu información fue guardada correctamente', variant: 'success' })
   }
 
-  const handleSaveNotifications = () => {
-    addToast({ title: 'Notificaciones guardadas', description: 'Tus preferencias fueron actualizadas', variant: 'success' })
-  }
-
-  const handleInviteUser = () => {
-    addToast({ title: 'Invitación enviada', description: 'Se envió un email de invitación', variant: 'success' })
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight font-heading">Ajustes</h1>
-          <p className="text-neutral-600 mt-1">Configura tu cuenta, notificaciones y seguridad</p>
+          <p className="text-neutral-600 mt-1">Configura tu cuenta y seguridad</p>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-neutral-500">Modo Oscuro</span>
@@ -210,9 +145,7 @@ export function AjustesPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="profile">Perfil</TabsTrigger>
-          <TabsTrigger value="notifications">Notificaciones</TabsTrigger>
           <TabsTrigger value="security">Seguridad</TabsTrigger>
-          <TabsTrigger value="team">Equipo</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="mt-6">
@@ -272,43 +205,6 @@ export function AjustesPage() {
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
-
-        <TabsContent value="notifications" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Preferencias de Notificaciones</CardTitle>
-              <CardDescription>Configura cómo y cuándo quieres recibir notificaciones</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="font-medium">Notificaciones por Email</h3>
-                <div className="space-y-3">
-                  {[
-                    { label: 'Nuevos leads asignados', enabled: true },
-                    { label: 'Visitas programadas', enabled: true },
-                    { label: 'Actualizaciones de pipeline', enabled: false },
-                    { label: 'Reportes semanales', enabled: true },
-                    { label: 'Tareas vencidas', enabled: true },
-                    { label: 'Nuevos documentos', enabled: false },
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <span className="text-sm">{item.label}</span>
-                      <button
-                        type="button"
-                        className={cn("relative inline-flex h-6 w-11 items-center rounded-full transition-colors", item.enabled ? "bg-primary" : "bg-neutral-200")}
-                      >
-                        <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white transition-transform", item.enabled ? "translate-x-6" : "translate-x-1")} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="pt-4 border-t">
-                <Button onClick={handleSaveNotifications}><Save className="h-4 w-4 mr-2" />Guardar Preferencias</Button>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="security" className="mt-6">
@@ -390,94 +286,6 @@ export function AjustesPage() {
             </Card>
           </div>
         </TabsContent>
-
-        <TabsContent value="team" className="mt-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Mi Equipo</CardTitle>
-                  <CardDescription>Gestiona los miembros del equipo y sus roles</CardDescription>
-                </div>
-                <Button onClick={handleInviteUser}><Plus className="h-4 w-4 mr-2" />Invitar Miembro</Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {teamMembers.map((member) => (
-                  <TeamMemberItem key={member.id} member={member} />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Actividad Reciente del Equipo</CardTitle>
-              <CardDescription>Historial de acciones realizadas por los miembros</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {[
-                  { user: 'Roberto García', action: 'creó una nueva propiedad', time: 'Hace 2h', avatar: 'RG' },
-                  { user: 'María López', action: 'actualizó el pipeline de Carlos Pérez', time: 'Hace 4h', avatar: 'ML' },
-                  { user: 'Carlos Pérez', action: 'contactó a un lead', time: 'Ayer', avatar: 'CP' },
-                  { user: 'Ana Martínez', action: 'agregó un documento', time: 'Ayer', avatar: 'AM' },
-                ].map((activity, i) => (
-                  <div key={i} className="flex items-center gap-3 text-sm">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
-                      {activity.avatar}
-                    </div>
-                    <p className="flex-1">
-                      <span className="font-medium">{activity.user}</span>
-                      <span className="text-neutral-600"> {activity.action}</span>
-                    </p>
-                    <span className="text-xs text-neutral-500">{activity.time}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="branding" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Personalización de Marca</CardTitle>
-              <CardDescription>Ajusta los colores y estilos de tu inmobiliaria</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <Label>Color Primario</Label>
-                  <div className="flex items-center gap-3 mt-2">
-                    <div className="h-10 w-10 rounded-md bg-primary" />
-                    <Input defaultValue="#0B1C3E" className="flex-1" />
-                  </div>
-                </div>
-                <div>
-                  <Label>Color Secundario</Label>
-                  <div className="flex items-center gap-3 mt-2">
-                    <div className="h-10 w-10 rounded-md bg-secondary" />
-                    <Input defaultValue="#FEA516" className="flex-1" />
-                  </div>
-                </div>
-              </div>
-              <div>
-                <Label>Logo de la Empresa</Label>
-                <div className="mt-2 p-8 border-2 border-dashed border-outline-variant rounded-lg text-center">
-                  <Palette className="h-8 w-8 text-neutral-400 mx-auto mb-2" />
-                  <p className="text-sm text-neutral-500">Arrastra tu logo aquí o haz clic para seleccionar</p>
-                </div>
-              </div>
-              <div className="pt-4">
-                <Button><Save className="h-4 w-4 mr-2" />Guardar Configuración</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-
       </Tabs>
     </div>
   )

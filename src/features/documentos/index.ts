@@ -1,3 +1,5 @@
-export { useDocumentos } from './hooks/useDocumentos'
-export { ContractWizard } from './components'
+export { useDocumentosList } from './hooks/useDocumentosList'
+export { useNewDocumentForm } from './hooks/useNewDocumentForm'
+export { useContractWizard } from './hooks/useContractWizard'
+export { ContractWizard, DocumentosFilters, DocumentosTable, NewDocumentModal, EditDocumentModal } from './components'
 export type { DocType, DocStatus, NewDocForm, WizardData } from './types'

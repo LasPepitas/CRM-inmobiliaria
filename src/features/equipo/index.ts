@@ -1,4 +1,5 @@
 export { AgentCard } from './components/AgentCard'
+export { AgentTable } from './components/AgentTable'
 export { AgentFormModal } from './components/AgentFormModal'
 export { DeleteAgentDialog } from './components/DeleteAgentDialog'
 export { AgentEmptyState } from './components/AgentEmptyState'
