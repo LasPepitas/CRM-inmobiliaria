@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -7,7 +7,8 @@ import { Save } from 'lucide-react'
 import { DOC_TYPES, DOC_STATUSES } from '../constants'
 import type { ApiDocument } from '../adapters/documentosAdapter'
 import type { NewDocForm } from '../types'
-import type { Lead, Property } from '@/store'
+import type { Lead } from '@/features/leads/types'
+import type { Property } from '@/store'
 
 interface EditDocumentModalProps {
   doc: ApiDocument | null
@@ -18,27 +19,14 @@ interface EditDocumentModalProps {
 }
 
 export function EditDocumentModal({ doc, properties, leads, onSave, onClose }: EditDocumentModalProps) {
-  const [form, setForm] = useState<NewDocForm & { id: string }>({
-    id: '',
-    name: '',
-    type: 'Contrato',
-    status: 'Borrador',
-    property_id: '',
-    lead_id: '',
-  })
-
-  useEffect(() => {
-    if (doc) {
-      setForm({
-        id: doc.id,
-        name: doc.name,
-        type: doc.type,
-        status: doc.status,
-        property_id: doc.property_id ?? '',
-        lead_id: doc.leadId ?? '',
-      })
-    }
-  }, [doc])
+  const [form, setForm] = useState<NewDocForm & { id: string }>(() => ({
+    id: doc?.id ?? '',
+    name: doc?.name ?? '',
+    type: doc?.type ?? 'Contrato',
+    status: doc?.status ?? 'Borrador',
+    property_id: doc?.property_id ?? '',
+    lead_id: doc?.leadId ?? '',
+  }))
 
   if (!doc) return null
 

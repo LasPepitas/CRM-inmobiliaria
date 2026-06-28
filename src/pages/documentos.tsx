@@ -147,6 +147,7 @@ export function DocumentosPage() {
       />
 
       <EditDocumentModal
+        key={editingDoc?.id ?? 'edit-doc-modal'}
         doc={editingDoc}
         properties={properties}
         leads={leads}

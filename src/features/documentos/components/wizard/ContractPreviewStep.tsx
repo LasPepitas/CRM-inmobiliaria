@@ -1,8 +1,8 @@
-import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Printer } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
-import type { Lead, Property, Deal } from '@/store'
+import type { Lead } from '@/features/leads/types'
+import type { Property, Deal } from '@/store'
 import type { WizardData } from '../../types'
 
 // Re-declare or import context type to access shared state.

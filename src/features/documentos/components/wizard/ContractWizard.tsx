@@ -1,4 +1,4 @@
-import React, { createContext, useContext, lazy, Suspense } from 'react'
+import { createContext, useContext, lazy, Suspense } from 'react'
 
 const ContractPreviewStep = lazy(() =>
   import('./ContractPreviewStep').then(m => ({ default: m.ContractPreviewStep }))
@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CheckCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
-import type { Lead, Property, Deal } from '@/store'
+import type { Lead } from '@/features/leads/types'
+import type { Property, Deal } from '@/store'
 import type { WizardData } from '../../types'
 
 interface ContractWizardContextType {

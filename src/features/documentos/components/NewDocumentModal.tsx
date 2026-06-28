@@ -5,7 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus } from 'lucide-react'
 import { DOC_TYPES } from '../constants'
 import type { NewDocForm } from '../types'
-import type { Lead, Property } from '@/store'
+import type { Lead } from '@/features/leads/types'
+import type { Property } from '@/store'
 
 interface NewDocumentModalProps {
   open: boolean
