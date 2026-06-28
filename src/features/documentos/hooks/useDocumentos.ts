@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useStore } from '@/store'
 import { uploadDocumentApi, getDocumentsApi, deleteDocumentApi } from '../services/documentosService'
 import { adaptDocument } from '../adapters/documentosAdapter'
@@ -17,6 +17,7 @@ export function useDocumentos() {
   const [typeFilter, setTypeFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [docSearch, setDocSearch] = useState('')
+  const [debouncedDocSearch, setDebouncedDocSearch] = useState('')
   const [wizardStep, setWizardStep] = useState(1)
   const [wizardData, setWizardData] = useState<WizardData>(WIZARD_DEFAULT)
   const [isLoading, setIsLoading] = useState(false)
@@ -24,18 +25,28 @@ export function useDocumentos() {
   const [docRef] = useState(() => `DOC-${Date.now().toString().slice(-6)}`)
   const [currentDate] = useState(() => new Date().toLocaleDateString('es-AR'))
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedDocSearch(docSearch)
+    }, 300)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [docSearch])
+
   const allDocs = useMemo<ApiDocument[]>(() => hasFetched ? localDocs : [], [hasFetched, localDocs])
 
   const filteredDocuments = useMemo(
     () => allDocs.filter(doc => {
       const matchesType = !typeFilter || doc.type === typeFilter
       const matchesStatus = !statusFilter || doc.status === statusFilter
-      const matchesSearch = !docSearch ||
-        doc.name.toLowerCase().includes(docSearch.toLowerCase()) ||
-        (properties.find(p => p.id === doc.property_id)?.title || '').toLowerCase().includes(docSearch.toLowerCase())
+      const matchesSearch = !debouncedDocSearch ||
+        doc.name.toLowerCase().includes(debouncedDocSearch.toLowerCase()) ||
+        (properties.find(p => p.id === doc.property_id)?.title || '').toLowerCase().includes(debouncedDocSearch.toLowerCase())
       return matchesType && matchesStatus && matchesSearch
     }),
-    [allDocs, typeFilter, statusFilter, docSearch, properties]
+    [allDocs, typeFilter, statusFilter, debouncedDocSearch, properties]
   )
 
   const activeFilters = [typeFilter, statusFilter, docSearch].filter(Boolean).length

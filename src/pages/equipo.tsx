@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { UserPlus, Search, DollarSign, Building2, TrendingUp, RotateCw } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { AgentCard, AgentFormModal, DeleteAgentDialog, AgentEmptyState, useEquipo } from '@/features/equipo'
+import { Can } from '@/features/auth'
 
 export function EquipoPage() {
   const {
@@ -41,10 +42,12 @@ export function EquipoPage() {
           <h1 className="text-3xl font-bold tracking-tight font-heading">Equipo</h1>
           <p className="text-neutral-600 mt-1">{agents.length} miembros en tu equipo</p>
         </div>
-        <Button id="add-agent-btn" onClick={openAddModal}>
-          <UserPlus className="h-4 w-4" />
-          Agregar Miembro
-        </Button>
+        <Can perform="equipo:create">
+          <Button id="add-agent-btn" onClick={openAddModal}>
+            <UserPlus className="h-4 w-4" />
+            Agregar Miembro
+          </Button>
+        </Can>
       </div>
 
       {/* Team KPIs */}

@@ -1,5 +1,6 @@
 export { useAuth } from './hooks/useAuth'
 export { useAuthStore } from './store/authSlice'
+export { Can } from './components/Can'
 export * from './types'
 export * from './services/authService'
 export * from './adapters/authAdapter'

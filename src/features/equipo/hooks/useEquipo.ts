@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useStore } from '@/store'
 import type { Agent } from '@/store/slices/agentsSlice'
 import type { AgentFormData } from '../types'
@@ -36,17 +36,47 @@ export function useEquipo() {
     [agents, debouncedSearch]
   )
 
-  const getAgentMetrics = (agentId: string) => {
-    const agentDeals = deals.filter(d => {
-      const lead = leads.find(l => l.id === d.lead_id)
-      return lead?.assigned_agent === agentId
+  const agentsMetricsMap = useMemo(() => {
+    const map: Record<string, { activeDeals: number; totalValue: number; agentLeads: number }> = {}
+
+    // Inicializar mapa para cada agente
+    agents.forEach(a => {
+      map[a.id] = { activeDeals: 0, totalValue: 0, agentLeads: 0 }
     })
-    return {
-      activeDeals: agentDeals.filter(d => d.stage !== 'Cierre').length,
-      totalValue: agentDeals.reduce((sum, d) => sum + d.value, 0),
-      agentLeads: leads.filter(l => l.assigned_agent === agentId).length,
-    }
-  }
+
+    // Contabilizar Leads en O(L)
+    leads.forEach(l => {
+      if (l.assigned_agent && map[l.assigned_agent]) {
+        map[l.assigned_agent].agentLeads++
+      }
+    })
+
+    // Mapear lead_id a assigned_agent para búsqueda O(1) de negocios
+    const leadAgentMap = new Map<string, string>()
+    leads.forEach(l => {
+      if (l.assigned_agent) {
+        leadAgentMap.set(l.id, l.assigned_agent)
+      }
+    })
+
+    // Contabilizar Deals en O(D)
+    deals.forEach(d => {
+      const assignedAgentId = leadAgentMap.get(d.lead_id)
+      if (assignedAgentId && map[assignedAgentId]) {
+        const metrics = map[assignedAgentId]
+        if (d.stage !== 'Cierre') {
+          metrics.activeDeals++
+        }
+        metrics.totalValue += d.value
+      }
+    })
+
+    return map
+  }, [agents, leads, deals])
+
+  const getAgentMetrics = useCallback((agentId: string) => {
+    return agentsMetricsMap[agentId] || { activeDeals: 0, totalValue: 0, agentLeads: 0 }
+  }, [agentsMetricsMap])
 
   const teamStats = useMemo(() => ({
     totalRevenue: agents.reduce((sum, a) => sum + a.revenue, 0),

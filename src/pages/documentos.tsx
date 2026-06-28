@@ -13,11 +13,11 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   MoreVertical, Download, Send, Trash2, Plus, CheckCircle,
-  Search, SlidersHorizontal, FileSignature, Printer,
+  Search, SlidersHorizontal, FileSignature,
 } from 'lucide-react'
-import { formatDate, formatCurrency } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 import { DOC_TYPES, DOC_STATUSES, typeIcons, statusVariants } from '@/features/documentos/constants'
-import { useDocumentos } from '@/features/documentos'
+import { useDocumentos, ContractWizard } from '@/features/documentos'
 
 export function DocumentosPage() {
   const {
@@ -259,172 +259,26 @@ export function DocumentosPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Contract Wizard */}
-      <Dialog open={showWizardModal} onOpenChange={setShowWizardModal}>
-        <DialogContent className={wizardStep === 3 ? 'max-w-4xl max-h-[90vh] overflow-y-auto' : 'max-w-lg'}>
-          <DialogHeader><DialogTitle>Generador de Contratos</DialogTitle></DialogHeader>
-
-          {/* Progress bar */}
-          <div className="flex gap-2 mt-2">
-            {[1, 2, 3].map(s => (
-              <div key={s} className={`flex-1 h-1.5 rounded-full ${s <= wizardStep ? 'bg-primary' : 'bg-neutral-100'}`} />
-            ))}
-          </div>
-
-          {/* Step 1 */}
-          {wizardStep === 1 && (
-            <div className="space-y-4 py-4">
-              <h3 className="font-semibold text-lg">Paso 1: Seleccionar Cliente</h3>
-              <div>
-                <label className="text-sm font-medium">Cliente (Lead) *</label>
-                <Select value={wizardData.lead_id || '__none__'} onValueChange={v => setWizardData({ ...wizardData, lead_id: v === '__none__' ? '' : v })}>
-                  <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Seleccionar lead..." /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">Seleccionar lead...</SelectItem>
-                    {leads.map(l => <SelectItem key={l.id} value={l.id}>{`${l.firstName} ${l.lastName}`.trim()} — {l.email}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              {selectedLead && (
-                <div className="bg-neutral-50 p-4 rounded-lg text-sm">
-                  <p><strong>Datos encontrados:</strong></p>
-                  <p>Teléfono: {selectedLead.phone}</p>
-                  <p>Email: {selectedLead.email}</p>
-                  {selectedLead.payment_config && <p>Pago: {selectedLead.payment_config.type}</p>}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Step 2 */}
-          {wizardStep === 2 && (
-            <div className="space-y-4 py-4">
-              <h3 className="font-semibold text-lg">Paso 2: Operación y Propiedad</h3>
-              <div>
-                <label className="text-sm font-medium">Tipo de Operación</label>
-                <Select value={wizardData.type} onValueChange={v => setWizardData({ ...wizardData, type: v as 'compra' | 'alquiler' })}>
-                  <SelectTrigger className="w-full mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="compra">Compraventa</SelectItem>
-                    <SelectItem value="alquiler">Alquiler</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Negocio vinculado (Opcional)</label>
-                <Select
-                  value={wizardData.deal_id || '__none__'}
-                  onValueChange={v => {
-                    const deal = deals.find(d => d.id === v)
-                    setWizardData({ ...wizardData, deal_id: v === '__none__' ? '' : v, property_id: deal?.property_id || wizardData.property_id })
-                  }}
-                >
-                  <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Sin negocio específico" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">Sin negocio específico</SelectItem>
-                    {leadDeals.map(d => <SelectItem key={d.id} value={d.id}>{d.title} ({formatCurrency(d.value)})</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              {!wizardData.deal_id && (
-                <div>
-                  <label className="text-sm font-medium">Propiedad *</label>
-                  <Select value={wizardData.property_id || '__none__'} onValueChange={v => setWizardData({ ...wizardData, property_id: v === '__none__' ? '' : v })}>
-                    <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Seleccionar propiedad..." /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">Seleccionar propiedad...</SelectItem>
-                      {properties.map(p => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Step 3: Contract preview */}
-          {wizardStep === 3 && (
-            <div className="space-y-4 py-4">
-              <div className="print:hidden flex justify-between items-center mb-4">
-                <h3 className="font-semibold text-lg">Paso 3: Vista Previa</h3>
-                <Button variant="outline" onClick={handlePrint}>
-                  <Printer className="h-4 w-4 mr-2" /> Imprimir / PDF
-                </Button>
-              </div>
-              <div className="border border-neutral-200 p-8 md:p-12 bg-white text-black font-serif text-justify print:border-none print:p-0 max-w-[210mm] mx-auto min-h-[297mm] shadow-sm print:shadow-none">
-                <div className="flex justify-between items-start mb-12">
-                  <img src="/logo.png" alt="Grupo Siena" className="h-16 object-contain" />
-                  <div className="text-right text-sm text-gray-500 font-sans">
-                    <p>CONTRATO DE {wizardData.type.toUpperCase()}</p>
-                    <p>Nº Ref: {docRef}</p>
-                    <p>Fecha: {currentDate}</p>
-                  </div>
-                </div>
-                <h1 className="text-xl font-bold text-center mb-8 uppercase underline decoration-double underline-offset-4">
-                  CONTRATO DE {wizardData.type === 'compra' ? 'COMPRAVENTA' : 'ARRENDAMIENTO'} INMOBILIARIO
-                </h1>
-                <div className="space-y-6 text-sm leading-relaxed">
-                  <p>
-                    Entre <strong>GRUPO SIENA INMOBILIARIA</strong>, en adelante EL {wizardData.type === 'compra' ? 'VENDEDOR' : 'LOCADOR'},
-                    y por la otra parte <strong>{selectedLead ? `${selectedLead.firstName} ${selectedLead.lastName}`.trim().toUpperCase() : ''}</strong>, con DNI ________________,
-                    email: {selectedLead?.email}, teléfono: {selectedLead?.phone}, en adelante EL {wizardData.type === 'compra' ? 'COMPRADOR' : 'LOCATARIO'},
-                    se conviene celebrar el presente contrato sujeto a las siguientes cláusulas:
-                  </p>
-                  <p>
-                    <strong>PRIMERA (OBJETO):</strong> EL {wizardData.type === 'compra' ? 'VENDEDOR' : 'LOCADOR'} entrega
-                    al {wizardData.type === 'compra' ? 'COMPRADOR' : 'LOCATARIO'} el inmueble tipo <strong>{selectedProp?.type}</strong>,
-                    ubicado en la ciudad de <strong>{selectedProp?.city}</strong>, barrio <strong>{selectedProp?.neighborhood}</strong>,
-                    con una superficie de {selectedProp?.area_m2} m².
-                  </p>
-                  <p>
-                    <strong>SEGUNDA (PRECIO Y FORMA DE PAGO):</strong> El precio convenido por la operación se fija en la suma de
-                    <strong> {formatCurrency(selectedDeal?.value || selectedProp?.price || 0)}</strong>.
-                    {selectedLead?.payment_config?.type === 'cuotas'
-                      ? ` La operación se realizará en cuotas, con un anticipo de ${formatCurrency(selectedLead.payment_config.down_payment || 0)} y el resto en ${selectedLead.payment_config.installments} cuotas.`
-                      : selectedLead?.payment_config?.type === 'hipoteca'
-                        ? ` La operación se realizará mediante crédito hipotecario del banco ${selectedLead.payment_config.bank}.`
-                        : ' La operación se realizará al contado en su totalidad.'}
-                  </p>
-                  <p>
-                    <strong>TERCERA (CONDICIONES):</strong> El inmueble se entrega en el estado en que se encuentra, libre de ocupantes
-                    y con los impuestos al día. Las partes se someten a la jurisdicción de los tribunales ordinarios de la ciudad
-                    para cualquier divergencia originada en el presente contrato.
-                  </p>
-                  <div className="pt-24 flex justify-between px-12">
-                    <div className="text-center">
-                      <div className="border-t border-black w-48 mb-2" />
-                      <p className="font-bold">GRUPO SIENA</p>
-                      <p className="text-xs">Representante Legal</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="border-t border-black w-48 mb-2" />
-                      <p className="font-bold">{selectedLead ? `${selectedLead.firstName} ${selectedLead.lastName}`.trim().toUpperCase() : ''}</p>
-                      <p className="text-xs">DNI: ________________</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="print:hidden mt-4">
-            {wizardStep > 1 && (
-              <Button variant="outline" onClick={() => setWizardStep(s => s - 1)}>Atrás</Button>
-            )}
-            {wizardStep < 3 ? (
-              <Button
-                onClick={() => setWizardStep(s => s + 1)}
-                disabled={(wizardStep === 1 && !wizardData.lead_id) || (wizardStep === 2 && !wizardData.property_id && !wizardData.deal_id)}
-              >
-                Siguiente
-              </Button>
-            ) : (
-              <Button onClick={handleFinishWizard}>
-                <CheckCircle className="h-4 w-4 mr-2" /> Guardar Contrato
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Contract Wizard (Refactored to modular Compound Component) */}
+      <ContractWizard
+        open={showWizardModal}
+        onClose={() => setShowWizardModal(false)}
+        wizardStep={wizardStep}
+        wizardData={wizardData}
+        setWizardStep={setWizardStep}
+        setWizardData={setWizardData}
+        leads={leads}
+        properties={properties}
+        deals={deals}
+        selectedLead={selectedLead}
+        selectedDeal={selectedDeal}
+        selectedProp={selectedProp}
+        leadDeals={leadDeals}
+        docRef={docRef}
+        currentDate={currentDate}
+        handlePrint={handlePrint}
+        handleFinishWizard={handleFinishWizard}
+      />
     </div>
   )
 }

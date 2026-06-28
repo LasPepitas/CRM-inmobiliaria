@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Building2, TrendingUp, DollarSign, Mail, Phone, Edit, Trash2, IdCard } from 'lucide-react'
 import { cn, formatCurrency, getInitials } from '@/lib/utils'
 
+import { Can } from '@/features/auth'
+
 interface AgentMetrics {
   activeDeals: number
   totalValue: number
@@ -83,20 +85,24 @@ export function AgentCard({ agent, metrics, onEdit, onDelete }: AgentCardProps) 
         <div className="flex items-center justify-between pt-3 border-t border-outline-variant/50">
           <span className="text-xs text-neutral-400">{metrics.agentLeads} leads asignados</span>
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-            <Button
-              variant="ghost" size="icon"
-              className="h-8 w-8 text-neutral-400 hover:text-primary"
-              onClick={() => onEdit(agent)}
-            >
-              <Edit className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              variant="ghost" size="icon"
-              className="h-8 w-8 text-neutral-400 hover:text-error-500"
-              onClick={() => onDelete(agent.id)}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+            <Can perform="equipo:create">
+              <Button
+                variant="ghost" size="icon"
+                className="h-8 w-8 text-neutral-400 hover:text-primary"
+                onClick={() => onEdit(agent)}
+              >
+                <Edit className="h-3.5 w-3.5" />
+              </Button>
+            </Can>
+            <Can perform="equipo:delete">
+              <Button
+                variant="ghost" size="icon"
+                className="h-8 w-8 text-neutral-400 hover:text-error-500"
+                onClick={() => onDelete(agent.id)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </Can>
           </div>
         </div>
       </CardContent>

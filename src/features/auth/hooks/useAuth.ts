@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useAuthStore } from '../store/authSlice'
 import { loginApi, registerApi, getProfileApi } from '../services/authService'
 import type { LoginRequest, RegisterRequest } from '../types'
-import { ROUTE_ROLES } from '../types'
+import { ROLE_PERMISSIONS, ROUTE_PERMISSIONS, type Permission } from '../types'
 import { resetStore } from '@/store'
 
 export function useAuth() {
@@ -103,12 +103,28 @@ export function useAuth() {
     resetStore()
   }, [logout])
 
-  const hasRoutePermission = useCallback((route: string) => {
+  const hasPermission = useCallback((permission: Permission) => {
     const userRole = authUser?.role
-    const allowedRoles = ROUTE_ROLES[route]
-    if (!allowedRoles) return true
-    return !!(userRole && allowedRoles.includes(userRole))
+    if (!userRole) return false
+    const permissions = ROLE_PERMISSIONS[userRole] || []
+    return permissions.includes(permission)
   }, [authUser])
+
+  const hasRoutePermission = useCallback((routeOrPermission: string) => {
+    if (ROUTE_PERMISSIONS[routeOrPermission]) {
+      return hasPermission(ROUTE_PERMISSIONS[routeOrPermission])
+    }
+    
+    const userRole = authUser?.role
+    if (userRole) {
+      const permissions = ROLE_PERMISSIONS[userRole] || []
+      if (permissions.includes(routeOrPermission as Permission)) {
+        return true
+      }
+    }
+    
+    return !Object.keys(ROUTE_PERMISSIONS).includes(routeOrPermission) && !routeOrPermission.includes(':')
+  }, [authUser, hasPermission])
 
   return {
     authUser,
@@ -120,5 +136,6 @@ export function useAuth() {
     logout: handleLogout,
     checkSession,
     hasRoutePermission,
+    hasPermission,
   }
 }
